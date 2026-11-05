@@ -1,0 +1,142 @@
+---
+/**
+ * "Les grandes étapes de votre séjour" — seven-step timeline, presented as an
+ * EXAMPLE structure: the real itinerary is specified in each programme.
+ * Each step is an icon in a fine ring sitting on one hairline, then its
+ * number, title and text.
+ *  - ≥ 64em: one horizontal line through the rings, seven centred columns.
+ *  - < 64em: one vertical line on the start side, text beside each ring.
+ */
+import Icon from '@/components/ui/Icon.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getContent, getLang } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const { programmeExample } = getContent(lang);
+---
+
+<section id="voyage" class="tline theme-ivory" aria-labelledby="tline-title">
+  <div class="container">
+    <SectionHeading
+      id="tline-title"
+      eyebrow={programmeExample.eyebrow}
+      title={programmeExample.title}
+      intro={programmeExample.intro}
+      align="center"
+    />
+
+    <ol role="list" class="tline__steps">
+      {
+        programmeExample.steps.map((step, i) => (
+          <li class="tline__step" data-reveal style={`--reveal-delay: ${i * 70}ms`}>
+            <span class="tline__icon" aria-hidden="true">
+              <Icon name={step.icon} size={22} />
+            </span>
+            <div class="tline__body">
+              <span class="tline__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="tline__step-title">{step.title}</h3>
+              <p class="tline__step-text">{step.text.join(' ')}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .tline {
+    padding-block: var(--section-space);
+  }
+
+  .tline__steps {
+    --ring: 3rem;
+    position: relative;
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  /* The hairline runs through the centres of the rings. */
+  .tline__steps::before {
+    content: '';
+    position: absolute;
+    inset-block: calc(var(--ring) / 2);
+    inset-inline-start: calc(var(--ring) / 2);
+    inline-size: 1px;
+    background: var(--gold-line);
+  }
+
+  .tline__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--ring) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-md);
+  }
+
+  .tline__icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: var(--ring);
+    block-size: var(--ring);
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    background: var(--color-bg);
+    color: var(--color-ornament);
+  }
+
+  .tline__icon :global(svg) {
+    stroke-width: 1.2;
+  }
+
+  .tline__body {
+    display: grid;
+    gap: 0.3rem;
+    padding-block-start: 0.2rem;
+  }
+
+  .tline__num {
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    color: var(--color-accent-text);
+  }
+
+  .tline__step-title {
+    font-size: var(--text-lg);
+    line-height: 1.25;
+  }
+
+  .tline__step-text {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-light);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 64em) {
+    .tline__steps {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0 clamp(0.75rem, 1.4vw, 1.5rem);
+    }
+
+    .tline__steps::before {
+      inset-block: calc(var(--ring) / 2) auto;
+      inset-inline: calc(100% / 14);
+      inline-size: auto;
+      block-size: 1px;
+    }
+
+    .tline__step {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: var(--space-sm);
+      text-align: center;
+    }
+
+    .tline__body {
+      justify-items: center;
+      padding-block-start: 0;
+    }
+  }
+</style>

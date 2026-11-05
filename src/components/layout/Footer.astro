@@ -1,0 +1,314 @@
+---
+import Logo from '@/components/ui/Logo.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Floral from '@/components/ui/Floral.astro';
+import { site, contact, legal, whatsappHref, isWhatsappConfigured } from '@/config/site';
+import { getLang, ui } from '@/i18n';
+import { mediaCredits, hasIllustrations } from '@/config/media';
+
+const year = new Date().getFullYear();
+const lang = getLang(Astro.currentLocale);
+const t = ui[lang];
+---
+
+<footer class="site-footer theme-night">
+  <span class="site-footer__arch" aria-hidden="true">
+    <Floral size={300} class="site-footer__floral" />
+  </span>
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <Logo />
+        <p class="site-footer__arabic arabic" lang="ar">{site.nameArabic}</p>
+        <p class="site-footer__tagline">{t.tagline}</p>
+      </div>
+
+      <nav aria-label={t.footer.sitemap}>
+        <p class="site-footer__heading">{t.footer.sitemap}</p>
+        <ul role="list" class="site-footer__nav">
+          {t.nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+          <li><a href="#contact">{t.footer.contact}</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <p class="site-footer__heading">{t.footer.contact}</p>
+        <ul role="list" class="site-footer__contact">
+          <li>
+            <a href={whatsappHref(t.whatsappMessage)} {...(isWhatsappConfigured ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+              <span class="site-footer__icon"><Icon name="whatsapp" size={16} /></span> {t.footer.whatsapp}
+            </a>
+          </li>
+          {contact.email && (
+            <li><a href={`mailto:${contact.email}`}><span class="site-footer__icon"><Icon name="mail" size={16} /></span> {contact.email}</a></li>
+          )}
+          {contact.instagram && (
+            <li>
+              <a href={`https://instagram.com/${contact.instagram}`} target="_blank" rel="noopener noreferrer">
+                <span class="site-footer__icon"><Icon name="instagram" size={16} /></span> @{contact.instagram}
+              </a>
+            </li>
+          )}
+        </ul>
+      </div>
+
+      <div class="site-footer__seal" aria-hidden="true">
+        <span class="sparkle"></span>
+        <span class="site-footer__seal-text">{t.signature}</span>
+        <span class="site-footer__seal-rule"></span>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p>© {year} {lang === 'ar' ? site.nameArabic : site.name} <span class="sparkle" aria-hidden="true"></span> {t.signature}</p>
+      {legal.registration && <p>{legal.registration}</p>}
+      <ul role="list" class="site-footer__legal">
+        <li><a href={legal.mentionsUrl}>{t.footer.mentions}</a></li>
+        <li><a href={legal.privacyUrl}>{t.footer.privacy}</a></li>
+      </ul>
+    </div>
+
+    {mediaCredits.length > 0 && (
+      <details class="site-footer__credits">
+        <summary>{t.footer.credits}</summary>
+        <p>{t.footer.creditsIntro}</p>
+        <ul role="list">
+          {mediaCredits.map((c) => (
+            <li dir="ltr">
+              « <a href={c.sourceUrl} target="_blank" rel="noopener noreferrer">{c.title}</a> », {c.author} —{' '}
+              <a href={c.licenseUrl} target="_blank" rel="noopener noreferrer">{c.license}</a>
+            </li>
+          ))}
+        </ul>
+        {hasIllustrations && (
+          <p class="site-footer__illus">{t.footer.illustrations}</p>
+        )}
+      </details>
+    )}
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    --color-bg: var(--wine-950);
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--space-2xl) calc(var(--space-lg) + var(--mobile-bar-offset, 0px));
+    border-block-start: 1px solid var(--gold-line);
+    font-size: var(--text-sm);
+  }
+
+  .site-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-block-size: 2.5rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .site-footer a:hover {
+    color: var(--color-heading);
+  }
+
+  /* A faint hairline arch with a line-art bloom, at the start side. */
+  .site-footer__arch {
+    position: absolute;
+    inset-block: var(--space-xl) -2rem;
+    inset-inline-start: -8rem;
+    inline-size: 20rem;
+    border: 1px solid var(--hairline);
+    border-block-end: 0;
+    border-radius: var(--radius-arch);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .site-footer__arch :global(.site-footer__floral) {
+    position: absolute;
+    inset-block-end: -5rem;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: auto;
+    color: var(--rose-gold);
+    opacity: 0.16;
+  }
+
+  .site-footer > :global(.container) {
+    position: relative;
+  }
+
+  .site-footer__top {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block-end: var(--space-xl);
+    border-block-end: var(--border-hairline);
+  }
+
+  .site-footer__brand {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .site-footer__arabic {
+    font-size: var(--text-xl);
+    color: var(--color-accent-text);
+  }
+
+  .site-footer__tagline {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-xl);
+    font-weight: var(--weight-light);
+    color: var(--color-heading);
+  }
+
+  :global(:root[lang='ar']) .site-footer__tagline {
+    font-style: normal;
+  }
+
+  .site-footer__heading {
+    margin-block-end: var(--space-xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  :global(:root[lang='ar']) .site-footer__heading {
+    font-size: 0.875rem;
+    text-transform: none;
+  }
+
+  .site-footer__nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-md);
+  }
+
+  .site-footer__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+  }
+
+  /* Round seal echoing the hero. */
+  .site-footer__seal {
+    display: none;
+  }
+
+  .site-footer__bottom {
+    display: grid;
+    gap: var(--space-xs);
+    padding-block-start: var(--space-md);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+  }
+
+  .site-footer__bottom .sparkle {
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    margin-inline: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .site-footer__legal {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .site-footer__legal a {
+    color: var(--color-text-muted);
+  }
+
+  .site-footer__credits {
+    margin-block-start: var(--space-md);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+  }
+
+  .site-footer__credits summary {
+    cursor: pointer;
+    min-block-size: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .site-footer__credits p {
+    margin-block-end: var(--space-2xs);
+  }
+
+  .site-footer__illus {
+    margin-block-start: var(--space-xs);
+  }
+
+  .site-footer__credits li + li {
+    margin-block-start: var(--space-3xs);
+  }
+
+  .site-footer__credits a {
+    display: inline;
+    min-block-size: 0;
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--gold-line);
+  }
+
+  @media (min-width: 48em) {
+    .site-footer__top {
+      grid-template-columns: 1.3fr 1fr 1fr;
+      align-items: start;
+    }
+
+    .site-footer__bottom {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .site-footer__top {
+      grid-template-columns: 1.3fr 1.2fr 1fr auto;
+    }
+
+    .site-footer__seal {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 0.5rem;
+      inline-size: 9rem;
+      aspect-ratio: 1;
+      padding: 1rem;
+      border: 1px solid var(--gold-line);
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 6px var(--wine-950), inset 0 0 0 7px var(--hairline);
+      text-align: center;
+    }
+
+    .site-footer__seal-text {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-style: italic;
+      line-height: 1.2;
+      color: var(--color-heading);
+    }
+
+    :global(:root[lang='ar']) .site-footer__seal-text {
+      font-style: normal;
+    }
+
+    .site-footer__seal-rule {
+      inline-size: 1.5rem;
+      block-size: 1px;
+      background: var(--gold-line);
+    }
+  }
+</style>

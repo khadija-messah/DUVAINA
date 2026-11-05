@@ -1,0 +1,158 @@
+---
+/**
+ * FR / AR language switch. Links to the other language's home page and keeps
+ * the reader's position (see the script below). The active language is
+ * marked with aria-current.
+ */
+import { getLang, homePath, languages, ui } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const t = ui[lang].langSwitch;
+const codes = { fr: 'FR', ar: 'AR' } as const;
+---
+
+<nav class="lang-switch" aria-label={t.label}>
+  {
+    languages.map((code, i) => (
+      <>
+        {i > 0 && <span class="lang-switch__sep" aria-hidden="true" />}
+        <a
+          href={homePath[code]}
+          class="lang-switch__link"
+          lang={code}
+          hreflang={code}
+          aria-current={code === lang ? 'true' : undefined}
+          aria-label={t.names[code]}
+          data-lang-link
+        >
+          {codes[code]}
+        </a>
+      </>
+    ))
+  }
+</nav>
+
+<script>
+  /**
+   * Keep the reader at the same place when switching language.
+   * The two versions are separate pages (/ and /ar/) with the same structure
+   * but different heights (Arabic lines are taller), so a raw scrollY would
+   * land elsewhere. Before leaving, we store which block sits under the
+   * header (section, journey chapter, hotel) and how far into it the reader
+   * is; the other page restores that relative position, then again once the
+   * web fonts have changed the layout, unless the reader has scrolled since.
+   * BaseLayout hides the page (.lang-restoring) until the first restore, so
+   * there is no visible jump from the top.
+   */
+  const KEY = 'dh:lang-scroll';
+  const ANCHORS = 'main section, main .chapter, main .stay, body > footer';
+
+  const headerHeight = () => document.querySelector('[data-header]')?.getBoundingClientRect().height ?? 0;
+  const anchors = () => [...document.querySelectorAll<HTMLElement>(ANCHORS)];
+
+  type Saved = { i: number; ratio: number; y: number; hash: string };
+
+  function capture(): Saved {
+    const line = headerHeight() + 1;
+    let i = -1;
+    let ratio = 0;
+    // Document order: the last block crossing the line is the deepest one.
+    anchors().forEach((el, index) => {
+      const r = el.getBoundingClientRect();
+      if (r.top <= line && r.bottom > line) {
+        i = index;
+        ratio = (line - r.top) / r.height;
+      }
+    });
+    return { i, ratio, y: window.scrollY, hash: location.hash };
+  }
+
+  function targetY(saved: Saved): number {
+    const el = anchors()[saved.i];
+    if (!el) return saved.y;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    return Math.max(0, top + saved.ratio * el.offsetHeight - headerHeight() - 1);
+  }
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-lang-link]').forEach((link) => {
+    link.addEventListener('click', () => {
+      if (link.getAttribute('aria-current') === 'true') return;
+      try {
+        sessionStorage.setItem(KEY, JSON.stringify(capture()));
+      } catch {
+        // Storage unavailable: plain navigation, keep the section anchor at least.
+        if (location.hash) link.href = link.pathname + location.hash;
+      }
+    });
+  });
+
+  let saved: Saved | null = null;
+  try {
+    const raw = sessionStorage.getItem(KEY);
+    sessionStorage.removeItem(KEY);
+    saved = raw ? (JSON.parse(raw) as Saved) : null;
+  } catch {
+    saved = null;
+  }
+
+  if (saved) {
+    const data = saved;
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    const apply = () => window.scrollTo({ top: targetY(data), behavior: 'instant' });
+    apply();
+    document.documentElement.classList.remove('lang-restoring');
+    if (data.hash) history.replaceState(null, '', location.pathname + data.hash);
+
+    // Web fonts and lazy images still change heights for a moment: follow the
+    // layout until it settles (2s at most), and stop as soon as the reader
+    // scrolls on their own.
+    const follow = new ResizeObserver(apply);
+    const stop = () => {
+      follow.disconnect();
+      ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((type) => removeEventListener(type, stop));
+    };
+    follow.observe(document.body);
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((type) => addEventListener(type, stop, { passive: true }));
+    setTimeout(stop, 2000);
+  }
+</script>
+
+<style>
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    direction: ltr; /* always read "FR | AR" in the same order */
+  }
+
+  .lang-switch__link {
+    display: grid;
+    place-items: center;
+    min-inline-size: 2.25rem;
+    min-block-size: 2.75rem;
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.16em;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-block-end: 1px solid transparent;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .lang-switch__link:hover {
+    color: var(--color-heading);
+  }
+
+  .lang-switch__link[aria-current='true'] {
+    color: var(--color-heading);
+    border-block-end-color: var(--color-ornament);
+  }
+
+  .lang-switch__sep {
+    inline-size: 1px;
+    block-size: 0.8rem;
+    background: var(--color-ring);
+  }
+</style>

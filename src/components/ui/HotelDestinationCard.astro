@@ -1,0 +1,267 @@
+---
+/**
+ * Arched destination card for the hero promo: destination photo, hanging
+ * Black Cherry badge (icon, name, five stars), hotel-room photo and three
+ * small indicators. Each card is its own size container, so every proportion
+ * (arch, badge, type) follows the card's width.
+ */
+import { Image } from 'astro:assets';
+import Icon from '@/components/ui/Icon.astro';
+import type { IconName } from '@/components/ui/Icon.astro';
+import { getLang, mediaAlt } from '@/i18n';
+import { media, type MediaKey, type MediaSlot } from '@/config/media';
+
+interface Props {
+  icon: IconName;
+  prefix?: string;
+  city: string;
+  scene: MediaKey;
+  room: MediaKey;
+  starsLabel: string;
+  indicators: { icon: IconName; label: string }[];
+}
+
+const { icon, prefix, city, scene, room, starsLabel, indicators } = Astro.props;
+const lang = getLang(Astro.currentLocale);
+const sceneSrc = (media[scene] as MediaSlot).src!;
+const roomSrc = (media[room] as MediaSlot).src!;
+---
+
+<article class="hcard">
+  <div class="hcard__frame">
+    <figure class="hcard__scene">
+      <Image
+        src={sceneSrc}
+        alt={mediaAlt(scene, lang)}
+        widths={[320, 432]}
+        sizes="(min-width: 64em) 22vw, (min-width: 40em) 44vw, 90vw"
+        loading="eager"
+        class="hcard__img"
+      />
+    </figure>
+
+    <figure class="hcard__room">
+      <Image
+        src={roomSrc}
+        alt={mediaAlt(room, lang)}
+        widths={[320, 406]}
+        sizes="(min-width: 64em) 22vw, (min-width: 40em) 44vw, 90vw"
+        loading="eager"
+        class="hcard__img"
+      />
+    </figure>
+
+    <ul role="list" class="hcard__bar">
+      {
+        indicators.map((it) => (
+          <li class="hcard__ind">
+            <span class="hcard__ind-icon" aria-hidden="true">
+              <Icon name={it.icon} size={16} />
+            </span>
+            <span class="hcard__ind-label">{it.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="hcard__badge">
+    <span class="hcard__badge-icon" aria-hidden="true"><Icon name={icon} size={30} /></span>
+    <h3 class="hcard__city">
+      {prefix && <span class="hcard__prefix">{prefix}</span>}
+      {city}
+    </h3>
+    <span class="hcard__stars" role="img" aria-label={starsLabel}>
+      {Array.from({ length: 5 }, () => <Icon name="star5" size={10} />)}
+    </span>
+    <span class="hcard__gem" aria-hidden="true"></span>
+  </div>
+</article>
+
+<style>
+  .hcard {
+    --gold: color-mix(in srgb, var(--rose-gold) 50%, var(--champagne));
+    --gold-line: color-mix(in srgb, var(--gold) 85%, transparent);
+    position: relative;
+    container-type: inline-size;
+    padding-block-start: 1.1rem; /* the badge hangs above the arch */
+  }
+
+  /* Black Cherry arch with a fine champagne-gold edge. */
+  .hcard__frame {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 5px;
+    border: 1.5px solid var(--gold-line);
+    border-radius: 50cqi 50cqi 16px 16px / 40cqi 40cqi 16px 16px;
+    background: linear-gradient(180deg, var(--black-cherry), var(--black-cherry-dark));
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--champagne) 45%, transparent),
+      0 18px 38px rgb(66 18 31 / 0.28);
+  }
+
+  .hcard__scene,
+  .hcard__room {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .hcard__scene {
+    aspect-ratio: 10 / 9;
+    border-radius: calc(50cqi - 6px) calc(50cqi - 6px) 0 0 / calc(40cqi - 6px) calc(40cqi - 6px) 0 0;
+  }
+
+  .hcard__room {
+    aspect-ratio: 19 / 10;
+    border: 1.5px solid var(--gold-line);
+    border-radius: 12px 12px 4px 4px;
+  }
+
+  .hcard__img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  /* ---- Indicators ---- */
+  .hcard__bar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.55rem 0.25rem 0.5rem;
+  }
+
+  .hcard__ind {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    text-align: center;
+  }
+
+  .hcard__ind-icon {
+    display: grid;
+    place-items: center;
+    inline-size: 1.9rem;
+    block-size: 1.9rem;
+    flex: none;
+    border: 1px solid var(--gold-line);
+    border-radius: 50%;
+    color: var(--gold);
+  }
+
+  .hcard__ind-label {
+    font-size: clamp(0.625rem, 3.5cqi, 0.75rem);
+    font-weight: var(--weight-medium, 500);
+    line-height: 1.25;
+    color: color-mix(in srgb, var(--champagne) 92%, transparent);
+  }
+
+  /* Wider cards: icon beside its label, as in the brand visual. */
+  @container (min-width: 19rem) {
+    .hcard__ind {
+      flex-direction: row;
+      justify-content: center;
+      gap: 0.45rem;
+      text-align: start;
+    }
+  }
+
+  /* ---- Hanging badge ---- */
+  .hcard__badge {
+    position: absolute;
+    inset-block-start: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    inline-size: 40cqi;
+    padding: 0.65rem 0.4rem 1.4rem;
+    color: var(--champagne);
+    text-align: center;
+    filter: drop-shadow(0 6px 10px rgb(28 11 18 / 0.35));
+  }
+
+  .hcard__badge::before,
+  .hcard__badge::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    clip-path: polygon(14% 0, 86% 0, 100% 8%, 100% 80%, 50% 100%, 0 80%, 0 8%);
+  }
+
+  /* Gold edge, then the Black Cherry body inset by 1.5px. */
+  .hcard__badge::before {
+    inset: 0;
+    background: linear-gradient(180deg, var(--champagne), var(--rose-gold));
+  }
+
+  .hcard__badge::after {
+    inset: 1.5px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--black-cherry) 92%, var(--white)), var(--black-cherry-dark));
+  }
+
+  .hcard__badge-icon {
+    color: var(--gold);
+  }
+
+  .hcard__badge-icon :global(svg) {
+    inline-size: clamp(1.5rem, 13cqi, 2.4rem);
+    block-size: auto;
+    stroke-width: 1.2;
+  }
+
+  .hcard__city {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(0.8rem, 6.2cqi, 1.2rem);
+    font-weight: var(--weight-medium, 500);
+    line-height: 1.02;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--champagne);
+  }
+
+  .hcard__prefix {
+    font-size: 0.85em;
+  }
+
+  .hcard__stars {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--gold);
+  }
+
+  .hcard__stars :global(svg) {
+    inline-size: clamp(0.5rem, 3.4cqi, 0.7rem);
+    block-size: auto;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .hcard__gem {
+    inline-size: 5px;
+    block-size: 5px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  /* Arabic: no capitals; Amiri needs a touch more size and line-height. */
+  :global(:root[lang='ar']) .hcard__city {
+    font-size: clamp(0.95rem, 7cqi, 1.35rem);
+    line-height: 1.25 !important;
+    text-transform: none;
+  }
+
+  :global(:root[lang='ar']) .hcard__ind-label {
+    font-size: clamp(0.7rem, 3.9cqi, 0.8125rem);
+  }
+</style>

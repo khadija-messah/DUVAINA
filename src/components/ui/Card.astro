@@ -1,0 +1,104 @@
+---
+/**
+ * Card.
+ *  - plain:    hairline-bordered surface, for feature / pillar content
+ *  - quiet:    no border, tinted surface — for secondary groupings
+ *  - outline:  transparent with border — for use on coloured sections
+ */
+import Icon from './Icon.astro';
+import type { IconName } from './Icon.astro';
+
+interface Props {
+  variant?: 'plain' | 'quiet' | 'outline';
+  icon?: IconName;
+  index?: string;
+  title?: string;
+  as?: 'article' | 'div' | 'li';
+  /** Stagger for the scroll reveal, in ms. */
+  delay?: number;
+  class?: string;
+}
+
+const { variant = 'plain', icon, index, title, as: Tag = 'article', delay = 0, class: className } = Astro.props;
+---
+
+<Tag class:list={['card', `card--${variant}`, className]} data-reveal style={delay ? `--reveal-delay: ${delay}ms` : undefined}>
+  {
+    (icon || index) && (
+      <div class="card__marker" aria-hidden="true">
+        {icon ? <Icon name={icon} size={22} /> : <span>{index}</span>}
+      </div>
+    )
+  }
+  {title && <h3 class="card__title">{title}</h3>}
+  <div class="card__body"><slot /></div>
+</Tag>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    border-radius: var(--radius-md);
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .card--plain {
+    background: var(--color-surface);
+    border: var(--border-hairline);
+  }
+
+  .card--plain:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .card--quiet {
+    background: var(--color-surface-alt);
+  }
+
+  .card--outline {
+    border: var(--border-hairline);
+  }
+
+  /* Marker: a small arch, Rose Gold-tinted, with a Rose Gold hairline. */
+  .card__marker {
+    display: grid;
+    place-items: center;
+    inline-size: 3rem;
+    block-size: 3.5rem;
+    margin-block-end: var(--space-2xs);
+    padding-block-start: 0.25rem;
+    border: var(--border-accent);
+    border-radius: var(--radius-arch);
+    background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+    color: var(--color-heading);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+  }
+
+  .card__title {
+    font-size: var(--text-xl);
+  }
+
+  .card__body {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.75;
+  }
+
+  .card__body :global(p + p) {
+    margin-block-start: var(--space-xs);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card--plain:hover {
+      transform: none;
+    }
+  }
+</style>

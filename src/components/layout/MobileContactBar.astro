@@ -1,0 +1,73 @@
+---
+/**
+ * Mobile-only sticky conversion bar. Most visitors arrive from social media /
+ * WhatsApp on a phone, so the primary action stays one thumb-tap away.
+ * Appears after the hero; hides while the contact section is on screen.
+ */
+import Button from '@/components/ui/Button.astro';
+import { whatsappHref, isWhatsappConfigured } from '@/config/site';
+import { getLang, ui } from '@/i18n';
+
+const t = ui[getLang(Astro.currentLocale)];
+---
+
+<div class="mobile-bar" data-mobile-bar aria-hidden="true">
+  <Button href={whatsappHref(t.whatsappMessage)} external={isWhatsappConfigured} icon="whatsapp" iconPosition="start" size="lg" block tabindex="-1">
+    {t.mobileBarCta}
+  </Button>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-mobile-bar]');
+  const hero = document.querySelector('[data-hero]');
+  const contactSection = document.querySelector('#contact');
+
+  if (bar && hero) {
+    let pastHero = false;
+    let contactVisible = false;
+    const update = () => {
+      const show = pastHero && !contactVisible;
+      bar.toggleAttribute('data-visible', show);
+      bar.setAttribute('aria-hidden', String(!show));
+      bar.querySelector('a')?.setAttribute('tabindex', show ? '0' : '-1');
+    };
+
+    new IntersectionObserver(([entry]) => {
+      pastHero = !entry.isIntersecting;
+      update();
+    }).observe(hero);
+
+    if (contactSection) {
+      new IntersectionObserver(([entry]) => {
+        contactVisible = entry.isIntersecting;
+        update();
+      }).observe(contactSection);
+    }
+  }
+</script>
+
+<style>
+  .mobile-bar {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: var(--z-mobile-bar);
+    padding: var(--space-xs) var(--gutter) calc(var(--space-xs) + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--wine-950) 90%, transparent);
+    border-block-start: var(--border-hairline);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transform: translateY(100%);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .mobile-bar[data-visible] {
+    transform: none;
+  }
+
+  @media (min-width: 48em) {
+    .mobile-bar {
+      display: none;
+    }
+  }
+</style>

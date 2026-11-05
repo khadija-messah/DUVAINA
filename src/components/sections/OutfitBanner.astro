@@ -1,0 +1,224 @@
+---
+/**
+ * "Une tenue qui nous unit" — editorial band on the deeper wine ground.
+ * Text and fine-line features on the start side; a small staggered triptych
+ * of CONCEPT visuals and a hairline note card on the other. The outfit is not
+ * finalised: the card and caption say so.
+ */
+import { Image } from 'astro:assets';
+import Icon from '@/components/ui/Icon.astro';
+import { getContent, getLang, mediaAlt } from '@/i18n';
+import { media } from '@/config/media';
+
+const lang = getLang(Astro.currentLocale);
+const { outfitBanner } = getContent(lang);
+
+const collage = ['outfitTote', 'outfitShopping', 'outfitDetail'] as const;
+---
+
+<section id="tenue" class="obanner theme-cream" aria-labelledby="obanner-title">
+  <div class="container obanner__inner">
+    <div class="obanner__text" data-reveal>
+      <p class="eyebrow obanner__eyebrow">{outfitBanner.eyebrow}</p>
+      <h2 id="obanner-title" class="obanner__title">{outfitBanner.title}</h2>
+      <p class="obanner__lead">{outfitBanner.text.join(' ')}</p>
+      <ul role="list" class="obanner__features">
+        {
+          outfitBanner.features.map((f) => (
+            <li class="obanner__feature">
+              <span class="obanner__feature-icon" aria-hidden="true">
+                <Icon name={f.icon} size={20} />
+              </span>
+              <span class="obanner__feature-label">{f.label.join(' ')}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="obanner__side">
+      <div class="obanner__collage" data-reveal style="--reveal-delay: 100ms">
+        {
+          collage.map((slot) => {
+            const item = media[slot];
+            return (
+              <figure class="obanner__photo">
+                <Image src={item.src} alt={mediaAlt(slot, lang)} widths={[item.src.width]} sizes={`${item.src.width}px`} class="obanner__img" />
+              </figure>
+            );
+          })
+        }
+      </div>
+
+      <aside class="obanner__card" data-reveal style="--reveal-delay: 180ms">
+        <h3 class="obanner__card-title">{outfitBanner.card.title.join(' ')}</h3>
+        <p class="obanner__card-text">{outfitBanner.card.text.join(' ')}</p>
+        <p class="obanner__card-note"><span class="sparkle" aria-hidden="true"></span>{outfitBanner.conceptNote}</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .obanner {
+    padding-block: var(--section-space);
+  }
+
+  .obanner__inner {
+    display: grid;
+    gap: clamp(3rem, 2rem + 3vw, 5rem);
+    align-items: center;
+  }
+
+  /* ---- Text ---- */
+  .obanner__text {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-md);
+  }
+
+  .obanner__title {
+    font-size: var(--text-3xl);
+    line-height: 1.06;
+  }
+
+  .obanner__lead {
+    max-inline-size: 30rem;
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .obanner__features {
+    display: grid;
+    inline-size: 100%;
+    margin-block-start: var(--space-sm);
+    border-block-start: var(--border-hairline);
+  }
+
+  .obanner__feature {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding-block: 0.9rem;
+    border-block-end: var(--border-hairline);
+  }
+
+  .obanner__feature-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+  }
+
+  .obanner__feature-icon :global(svg) {
+    stroke-width: 1.3;
+  }
+
+  .obanner__feature-label {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.3;
+    color: var(--color-heading);
+  }
+
+  /* ---- Triptych of concept visuals ---- */
+  .obanner__side {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .obanner__collage {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    align-items: start;
+    max-inline-size: 34rem;
+  }
+
+  .obanner__photo {
+    margin: 0;
+    aspect-ratio: 3 / 4.4;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-placeholder);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+  }
+
+  .obanner__photo:nth-child(1) {
+    border-radius: var(--radius-arch-soft);
+  }
+
+  .obanner__photo:nth-child(2) {
+    margin-block-start: var(--space-xl);
+  }
+
+  .obanner__photo:nth-child(3) {
+    margin-block-start: var(--space-md);
+  }
+
+  /* The source crops carry pale edges: a slight zoom keeps them out of frame. */
+  .obanner__img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transform: scale(1.12);
+  }
+
+  /* ---- Note card ---- */
+  .obanner__card {
+    max-inline-size: 34rem;
+    padding: var(--space-lg);
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius-lg);
+    background: var(--color-panel);
+  }
+
+  .obanner__card-title {
+    font-size: var(--text-xl);
+    line-height: 1.2;
+  }
+
+  .obanner__card-text {
+    margin-block-start: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-light);
+    line-height: 1.75;
+    color: var(--color-text-muted);
+  }
+
+  .obanner__card-note {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-block-start: var(--space-md);
+    font-size: var(--text-xs);
+    font-style: italic;
+    color: var(--color-accent-text);
+  }
+
+  :global(:root[lang='ar']) .obanner__card-note {
+    font-style: normal;
+  }
+
+  @media (min-width: 64em) {
+    .obanner__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 7rem);
+    }
+
+    .obanner__side {
+      justify-items: end;
+    }
+
+    .obanner__collage,
+    .obanner__card {
+      inline-size: 100%;
+    }
+  }
+</style>

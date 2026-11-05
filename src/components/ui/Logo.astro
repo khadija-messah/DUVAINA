@@ -1,0 +1,125 @@
+---
+/**
+ * Wordmark: ogee-arch symbol (double arch, diamond finial, eight-point star)
+ * + two-line lockup.
+ *   DUVANIA   — uppercase serif, generous tracking (heading colour:
+ *               Black Cherry Dark on light backgrounds, Champagne on dark)
+ *   HARAMAIN  — smaller uppercase, wider tracking, Rose Gold
+ * The mark is sized to the height of the text block so both sit on one axis.
+ * Source text stays "Duvania Haramain" (uppercase is CSS only) for screen readers.
+ */
+import { site } from '@/config/site';
+
+interface Props {
+  showArabic?: boolean;
+  class?: string;
+}
+
+const { showArabic = false, class: className } = Astro.props;
+---
+
+<span class:list={['logo', className]} dir="ltr">
+  <svg class="logo__mark" viewBox="0 0 40 48" width="30" height="36" aria-hidden="true">
+    <!-- Outer ogee arch (Rose Gold) -->
+    <path
+      class="logo__arch"
+      d="M6 47V24.5C6 17 11.5 13.6 15.6 10.9C18 9.3 19.5 7.8 20 6C20.5 7.8 22 9.3 24.4 10.9C28.5 13.6 34 17 34 24.5V47"
+      fill="none"
+      stroke-width="1.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <!-- Inner arch (text colour) -->
+    <path
+      d="M11 47V26C11 21 14.6 18.3 17.4 16.4C18.7 15.5 19.6 14.6 20 13.6C20.4 14.6 21.3 15.5 22.6 16.4C25.4 18.3 29 21 29 26V47"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity=".75"
+    />
+    <!-- Finial -->
+    <path class="logo__finial" d="M20 0.8L21.3 3.1L20 5.4L18.7 3.1Z" />
+    <!-- Eight-point star (khatam) -->
+    <g class="logo__star" fill="none" stroke-width="0.9" stroke-linejoin="round">
+      <path d="M17 30H23V36H17Z" />
+      <path d="M20 28.75L24.25 33L20 37.25L15.75 33Z" />
+    </g>
+  </svg>
+  <span class="logo__text">
+    <span class="logo__primary">Duvania</span>
+    <span class="logo__secondary">Haramain</span>
+  </span>
+  {showArabic && <span class="logo__arabic arabic" lang="ar">{site.nameArabic}</span>}
+</span>
+
+<style>
+  .logo {
+    --logo-scale: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: calc(0.75rem * var(--logo-scale));
+    color: var(--color-heading);
+    text-decoration: none;
+  }
+
+  /* Mark height = text block height (≈ 1.375rem cap line + gap + 0.625rem line). */
+  .logo__mark {
+    flex-shrink: 0;
+    block-size: calc(2.25rem * var(--logo-scale));
+    inline-size: calc(1.875rem * var(--logo-scale));
+  }
+
+  .logo__arch,
+  .logo__star {
+    stroke: var(--rose-gold);
+  }
+
+  .logo__finial {
+    fill: var(--rose-gold);
+  }
+
+  .logo__text {
+    display: grid;
+    justify-items: start;
+    row-gap: calc(0.3rem * var(--logo-scale));
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .logo__primary {
+    font-family: var(--font-display);
+    font-size: calc(1.375rem * var(--logo-scale));
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    /* Cancel the trailing tracking so the line ends on the last letter. */
+    margin-inline-end: -0.22em;
+    /* Trim the serif's internal leading so the block aligns optically with the mark. */
+    margin-block-start: -0.08em;
+  }
+
+  .logo__secondary {
+    font-family: var(--font-body);
+    font-size: calc(0.625rem * var(--logo-scale));
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    margin-inline-end: -0.46em;
+    color: var(--rose-gold);
+  }
+
+  .logo__arabic {
+    padding-inline-start: var(--space-xs);
+    border-inline-start: var(--border-hairline);
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 23.99em) {
+    .logo {
+      --logo-scale: 0.9;
+    }
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+/**
+ * Text set with the reference's line breaks.
+ * From 90em (where the design reference's widths fit) each line is its own
+ * unbreakable row; below that the lines flow as ordinary wrapping text, so
+ * narrow screens never overflow. A single-item array (e.g. the Arabic copy)
+ * renders as plain wrapping text.
+ */
+interface Props {
+  lines: string[];
+}
+
+const { lines } = Astro.props;
+---
+
+{
+  lines.length === 1
+    ? lines[0]
+    : lines.map((line, i) => (
+        <>
+          {i > 0 && ' '}
+          <span class="ln">{line}</span>
+        </>
+      ))
+}
+
+<style>
+  @media (min-width: 90em) {
+    .ln {
+      display: block;
+      white-space: nowrap;
+    }
+  }
+</style>

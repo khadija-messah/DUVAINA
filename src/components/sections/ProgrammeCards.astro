@@ -1,0 +1,187 @@
+---
+/**
+ * "Notre programme" — the four pillars of the experience as an editorial
+ * gallery: photographs with soft corners, then a serif title with a fine-line
+ * icon in a hairline circle, and a short text. No card surfaces or heavy
+ * shadows; rows are shared (subgrid) so the four columns stay aligned.
+ */
+import { Image } from 'astro:assets';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { getContent, getLang, mediaAlt } from '@/i18n';
+import { media } from '@/config/media';
+
+const lang = getLang(Astro.currentLocale);
+const { programmeCards } = getContent(lang);
+---
+
+<section id="experience" class="pcards theme-dark" aria-labelledby="pcards-title">
+  <div class="container">
+    <SectionHeading id="pcards-title" eyebrow={programmeCards.eyebrow} title={programmeCards.title} intro={programmeCards.intro} />
+
+    <ul role="list" class="pcards__grid">
+      {
+        programmeCards.cards.map((card, i) => {
+          const item = media[card.slot];
+          return (
+            <li class="pcard" data-reveal style={`--reveal-delay: ${i * 100}ms`}>
+              <figure class="pcard__media">
+                {item.src && (
+                  <Image
+                    src={item.src}
+                    alt={mediaAlt(card.slot, lang)}
+                    widths={[360, 540, 720]}
+                    sizes="(min-width: 64em) 22vw, (min-width: 40em) 45vw, 92vw"
+                    loading="lazy"
+                    class="pcard__img"
+                    style={`object-position: ${card.position}`}
+                  />
+                )}
+                <span class="pcard__index" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+              </figure>
+              <div class="pcard__head">
+                <h3 class="pcard__title">{card.title}</h3>
+                <span class="pcard__icon" aria-hidden="true">
+                  <Icon name={card.icon} size={18} />
+                </span>
+              </div>
+              <p class="pcard__text">{card.text.join(' ')}</p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .pcards {
+    padding-block: var(--section-space);
+  }
+
+  .pcards__grid {
+    display: grid;
+    gap: var(--space-xl) var(--space-lg);
+  }
+
+  .pcard {
+    display: grid;
+    align-content: start;
+  }
+
+  .pcard__media {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-placeholder);
+  }
+
+  .pcard__img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transition: transform 1.6s var(--ease-out);
+  }
+
+  .pcard:hover .pcard__img {
+    transform: scale(1.04);
+  }
+
+  .pcard__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--champagne) 10%, transparent);
+    background: linear-gradient(to top, rgb(36 5 13 / 0.35), transparent 35%);
+    pointer-events: none;
+  }
+
+  .pcard__index {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 1rem;
+    inset-inline-start: 1.1rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.18em;
+    color: var(--blush);
+  }
+
+  .pcard__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-md);
+    padding-block-end: var(--space-sm);
+    border-block-end: var(--border-hairline);
+  }
+
+  .pcard__title {
+    font-size: var(--text-lg);
+    line-height: 1.15;
+  }
+
+  .pcard__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+  }
+
+  .pcard__icon :global(svg) {
+    stroke-width: 1.3;
+  }
+
+  .pcard__text {
+    margin-block-start: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-light);
+    line-height: 1.75;
+    color: var(--color-text-muted);
+  }
+
+  /* From tablet, each card shares its rows (photo, title, text) with its
+     neighbours, so titles of different lengths keep everything aligned. */
+  @media (min-width: 40em) {
+    .pcards__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pcard__media {
+      aspect-ratio: 5 / 6;
+    }
+
+    .pcard {
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+
+    .pcard__head {
+      align-self: stretch;
+      align-items: end;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .pcards__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-xl) clamp(1.25rem, 2vw, 2rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pcard:hover .pcard__img {
+      transform: none;
+    }
+  }
+</style>

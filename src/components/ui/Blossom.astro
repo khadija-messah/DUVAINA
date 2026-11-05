@@ -1,0 +1,67 @@
+---
+/**
+ * Decorative powder-pink blossom (or a single loose petal), drawn in SVG.
+ * Purely ornamental: always aria-hidden. Gradient ids are unique per instance.
+ */
+interface Props {
+  size?: number;
+  variant?: 'flower' | 'petal';
+  rotate?: number;
+  class?: string;
+}
+
+const { size = 96, variant = 'flower', rotate = 0, class: className } = Astro.props;
+const uid = `bl-${Math.random().toString(36).slice(2, 8)}`;
+const petal = 'M0 -5C-15 -15-17-37-6-45C-2-47.5 2-47.5 6-45C17-37 15-15 0-5Z';
+---
+
+{
+  variant === 'flower' ? (
+    <svg
+      class:list={['blossom', className]}
+      width={size}
+      height={size}
+      viewBox="-50 -50 100 100"
+      aria-hidden="true"
+      focusable="false"
+      style={`transform: rotate(${rotate}deg)`}
+    >
+      <defs>
+        <radialGradient id={uid} cx="0" cy="0" r="48" gradientUnits="userSpaceOnUse">
+          <stop offset="0.12" stop-color="#E49AAD" />
+          <stop offset="0.55" stop-color="#F2C3CD" />
+          <stop offset="1" stop-color="#FBE6EA" />
+        </radialGradient>
+      </defs>
+      {[0, 72, 144, 216, 288].map((a) => (
+        <g transform={`rotate(${a})`}>
+          <path d={petal} fill={`url(#${uid})`} stroke="#E8A6B5" stroke-width="0.8" />
+          <path d="M0 -9V-34" stroke="#E08DA2" stroke-width="0.7" opacity="0.55" />
+        </g>
+      ))}
+      <circle r="7.5" fill="#E7BE7C" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+        <circle cx="0" cy="-12" r="1.6" fill="#C08A4E" transform={`rotate(${a + 22})`} />
+      ))}
+    </svg>
+  ) : (
+    <svg
+      class:list={['blossom', 'blossom--petal', className]}
+      width={size}
+      height={size * 1.4}
+      viewBox="-10 -14 20 28"
+      aria-hidden="true"
+      focusable="false"
+      style={`transform: rotate(${rotate}deg)`}
+    >
+      <path d="M0 13C-8 7-9-6-3-12.5C-1-14 1-14 3-12.5C9-6 8 7 0 13Z" fill="#F0B9C5" stroke="#E6A0B1" stroke-width="0.5" />
+    </svg>
+  )
+}
+
+<style>
+  .blossom {
+    display: block;
+    pointer-events: none;
+  }
+</style>

@@ -1,0 +1,752 @@
+---
+/**
+ * Hero — editorial composition on the night-burgundy ground.
+ *  - Start side: tracked label, light serif title on two balanced lines (one
+ *    italic accent), short lead, four premium highlights (fine gold icons
+ *    between hairlines), a Black Cherry pill and an outline pill.
+ *  - End side: an arched photograph of women in abayas before the Kaaba,
+ *    framed by a fine offset gold arch, with a round seal for the women-only
+ *    offer (23–55) and a "5-star accommodation" card hanging below the photo
+ *    (link to #hebergement; no hotel named).
+ *  - A barely visible eight-point star lattice sits behind everything.
+ *  - Below: a thin editorial strip (destinations, audience, signature,
+ *    tagline) between hairlines.
+ * Desktop: the whole hero fits the first screen under the header (svh).
+ * Logical properties throughout: the composition mirrors in Arabic.
+ */
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Floral from '@/components/ui/Floral.astro';
+import { site } from '@/config/site';
+import { media } from '@/config/media';
+import { getContent, getLang, mediaAlt, ui } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const { hero, eligibility } = getContent(lang);
+const t = ui[lang];
+const photo = media.journeyArrival;
+const room = media.promoMakkahRoom;
+// The ring text is repeated so it wraps the whole seal (Arabic is shorter).
+// Right-to-left text on a path runs backwards from startOffset: Arabic starts at 100%.
+const ring = `${hero.seal.ring} ✦ `.repeat(lang === 'ar' ? 4 : 2);
+---
+
+<section class="hero theme-dark" data-hero aria-labelledby="hero-title">
+  <span class="hero__glow" aria-hidden="true"></span>
+  <Floral class="hero__floral" size={420} stem />
+
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <p class="hero__eyebrow hero__rise" style="--d: 120ms">{hero.eyebrow}</p>
+      <h1 id="hero-title" class="hero__title hero__rise" style="--d: 220ms" set:html={hero.title} />
+      <p class="hero__lead hero__rise" style="--d: 360ms">{hero.lead}</p>
+      <ul role="list" class="hero__highlights hero__rise" style="--d: 440ms">
+        {
+          hero.highlights.map((h) => (
+            <li class="hero__highlight">
+              <span class="hero__highlight-icon" aria-hidden="true">
+                <Icon name={h.icon} size={20} />
+              </span>
+              <span class="hero__highlight-label">
+                {h.label.map((line) => <span>{line}</span>)}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="hero__actions hero__rise" style="--d: 520ms">
+        <Button href={hero.primaryCta.href} size="lg" icon="arrow-right">
+          {hero.primaryCta.label}
+        </Button>
+        <Button href={hero.secondaryCta.href} variant="secondary" size="lg" icon="arrow-right">
+          {hero.secondaryCta.label}
+        </Button>
+      </div>
+    </div>
+
+    <div class="hero__visual">
+      <span class="hero__arch-line" aria-hidden="true"><span class="sparkle"></span></span>
+      <figure class="hero__photo">
+        <Image
+          src={photo.src}
+          alt={mediaAlt('journeyArrival', lang)}
+          widths={[420, 640, 900]}
+          sizes="(min-width: 64em) 34vw, 80vw"
+          loading="eager"
+          fetchpriority="high"
+          class="hero__img"
+        />
+      </figure>
+      <div class="hero__seal" role="img" aria-label={eligibility.label}>
+        <svg class="hero__seal-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <path id="hero-seal-path" d="M60 60m-47 0a47 47 0 1 1 94 0a47 47 0 1 1-94 0" />
+          </defs>
+          <text>
+            {
+              lang === 'ar' ? (
+                <textPath href="#hero-seal-path" startOffset="100%">{ring}</textPath>
+              ) : (
+                <textPath href="#hero-seal-path" textLength="295" lengthAdjust="spacing">{ring}</textPath>
+              )
+            }
+          </text>
+        </svg>
+        <span class="hero__seal-core" aria-hidden="true">
+          <bdi class="hero__seal-value" dir="ltr">{hero.seal.value}</bdi>
+          <span class="hero__seal-unit">{hero.seal.unit}</span>
+        </span>
+      </div>
+      <a class="hero__stay" href={hero.stayCard.href}>
+        <span class="hero__stay-media">
+          <Image src={room.src} alt="" widths={[240, 360]} sizes="11rem" loading="eager" class="hero__stay-img" />
+        </span>
+        <span class="hero__stay-text">
+          <span class="hero__stay-title">{hero.stayCard.title}</span>
+          <span class="hero__stay-sub">{hero.stayCard.subtitle}</span>
+        </span>
+        <span class="hero__stay-arrow" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="container">
+    <ul role="list" class="hero__strip hero__rise" style="--d: 640ms">
+      {
+        hero.strip.map((item) => (
+          <li class="hero__strip-item">
+            <span class="label-caps">{item.label}</span>
+            <span class="hero__strip-value">{item.value}</span>
+          </li>
+        ))
+      }
+      <li class="hero__strip-item hero__strip-item--sign">
+        <span class="hero__signature">{lang === 'ar' ? site.nameArabic : 'Duvania Haramain'}</span>
+        <span class="sparkle" aria-hidden="true"></span>
+      </li>
+      <li class="hero__strip-item">
+        <span class="hero__tagline">{t.tagline}</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    padding-block: clamp(1.5rem, 1rem + 3vw, 3rem) 0;
+    margin-block-start: calc(-1 * var(--header-height));
+    padding-block-start: calc(var(--header-height) + clamp(1.5rem, 1rem + 3vw, 3rem));
+  }
+
+  /* Soft Black Cherry glow behind the photograph. */
+  /* A barely visible eight-point star lattice (Islamic geometry), fading out
+     towards the bottom. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72' fill='none' stroke='%23c9a46e' stroke-width='.6'%3E%3Cpath d='M26 26h20v20H26z'/%3E%3Cpath d='M36 22l14 14-14 14-14-14z'/%3E%3Cpath d='M0 36h22M50 36h22M36 0v22M36 50v22'/%3E%3C/svg%3E")
+      center / 72px 72px;
+    opacity: 0.05;
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%);
+    mask-image: linear-gradient(to bottom, #000, transparent 85%);
+    pointer-events: none;
+  }
+
+  .hero__glow {
+    position: absolute;
+    z-index: -1;
+    inset-block-start: -10%;
+    inset-inline-end: -10%;
+    inline-size: min(70rem, 110vw);
+    aspect-ratio: 1;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--black-cherry) 55%, transparent), transparent);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Hairline bloom drifting out of the bottom-start corner. */
+  .hero :global(.hero__floral) {
+    position: absolute;
+    z-index: -1;
+    inset-block-end: -9rem;
+    inset-inline-start: -7rem;
+    inline-size: clamp(14rem, 28vw, 26rem);
+    block-size: auto;
+    color: var(--rose-gold);
+    opacity: 0.2;
+    transform: rotate(-14deg);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: clamp(3rem, 2rem + 4vw, 4.5rem);
+    align-items: center;
+  }
+
+  /* ---- Copy ---- */
+  .hero__copy {
+    display: grid;
+    justify-items: start;
+  }
+
+  .hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.625rem;
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .hero__eyebrow::after {
+    content: '';
+    inline-size: 2.5rem;
+    block-size: 1px;
+    background: var(--color-accent-text);
+    opacity: 0.7;
+  }
+
+  /* Light serif in sentence case; the measure (≈ 11 em) and text-wrap: balance
+     set it on two even lines on desktop, three on phones. */
+  .hero__title {
+    max-inline-size: 11.5em;
+    margin-block-start: var(--space-sm);
+    font-size: clamp(2rem, 1.55rem + 1.9vw, 2.75rem);
+    font-weight: var(--weight-light);
+    line-height: 1.08;
+    letter-spacing: -0.005em;
+    color: var(--color-heading);
+    text-wrap: balance;
+  }
+
+  /* The italic accent, in antique rose. */
+  .hero__title :global(em) {
+    font-weight: var(--weight-light);
+    color: var(--color-accent-text);
+  }
+
+  .hero__lead {
+    max-inline-size: 29rem;
+    margin-block-start: var(--space-sm);
+    font-size: 0.875rem;
+    font-weight: var(--weight-light);
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-md);
+  }
+
+  /* Two pills side by side: slightly tighter than the default large size. */
+  /* Smaller, airier pills than the site default (hero only). */
+  .hero__actions :global(.btn) {
+    --btn-height: 2.75rem;
+    padding-inline: 1.5rem;
+    gap: 0.6rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.22em;
+  }
+
+  .hero__actions :global(.btn svg) {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+  }
+
+  :global(:root[lang='ar']) .hero__actions :global(.btn) {
+    font-size: 0.8125rem;
+  }
+
+  /* ---- Premium highlights: fine gold icons between hairlines ---- */
+  .hero__highlights {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-sm) 0;
+    inline-size: 100%;
+    max-inline-size: 31rem;
+    margin-block-start: var(--space-md);
+  }
+
+  .hero__highlight {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 0.4rem;
+    padding-inline: 0.6rem;
+    text-align: center;
+  }
+
+  .hero__highlight:nth-child(even) {
+    border-inline-start: 1px solid var(--hairline);
+  }
+
+  .hero__highlight-icon {
+    color: var(--color-ornament);
+  }
+
+  .hero__highlight-icon :global(svg) {
+    stroke-width: 1.1;
+  }
+
+  .hero__highlight-label {
+    display: grid;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--color-text);
+  }
+
+  .hero__highlight-label span:first-child {
+    color: var(--color-heading);
+  }
+
+  /* Each label is set as two unbroken lines (from tablet up). */
+  @media (min-width: 40em) {
+    .hero__highlight-label {
+      font-size: 0.6875rem;
+    }
+
+    .hero__highlight-label span {
+      white-space: nowrap;
+    }
+  }
+
+  :global(:root[lang='ar']) .hero__highlight-label {
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
+  /* ---- Visual ---- */
+  .hero__visual {
+    position: relative;
+    justify-self: center;
+    inline-size: min(100% - 2.5rem, 22rem);
+    margin-block: 1.25rem 2.75rem;
+  }
+
+  /* Fine offset arch in gold, slightly larger than the photo. */
+  .hero__arch-line {
+    position: absolute;
+    inset-block: -1.25rem 2.5rem;
+    inset-inline: 1.25rem -1.25rem;
+    border: 1px solid var(--gold-line);
+    border-block-end: 0;
+    border-radius: var(--radius-arch);
+    pointer-events: none;
+  }
+
+  .hero__arch-line .sparkle {
+    position: absolute;
+    inset-block-start: 58%;
+    inset-inline-end: -0.4rem;
+    inline-size: 0.8rem;
+    block-size: 0.8rem;
+  }
+
+  .hero__photo {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-arch-soft);
+    background: var(--color-placeholder);
+    box-shadow: var(--shadow-md);
+  }
+
+  .hero__img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    object-position: 44% 60%;
+    animation: hero-zoom 2.4s var(--ease-out) both;
+  }
+
+  /* A gentle wine veil at the foot of the photo. */
+  .hero__photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(36 5 13 / 0.45), transparent 40%);
+  }
+
+  /* ---- 5-star accommodation card, hanging below the photo ---- */
+  .hero__stay {
+    position: absolute;
+    z-index: 2;
+    inset-block-end: -2.75rem;
+    inset-inline: -0.75rem -0.75rem;
+    display: grid;
+    grid-template-columns: 5.25rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.35rem;
+    padding-inline-end: 0.85rem;
+    border: 1px solid var(--gold-line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--wine-950) 90%, transparent);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--color-heading);
+    text-decoration: none;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+    animation: hero-fade 1.2s var(--ease-out) 800ms both;
+  }
+
+  .hero__stay:hover {
+    border-color: var(--color-ornament);
+    transform: translateY(-2px);
+  }
+
+  .hero__stay-media {
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+
+  .hero__stay-img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .hero__stay-text {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .hero__stay-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.15;
+  }
+
+  .hero__stay-sub {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+  }
+
+  .hero__stay-arrow {
+    display: grid;
+    place-items: center;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+
+  .hero__stay:hover .hero__stay-arrow {
+    border-color: var(--color-ornament);
+  }
+
+  :global(:root[lang='ar']) .hero__stay-title {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  :global(:root[lang='ar']) .hero__stay-sub {
+    font-size: 0.75rem;
+  }
+
+  /* ---- Seal ---- */
+  .hero__seal {
+    position: absolute;
+    inset-block-end: 34%;
+    inset-inline-end: -1.25rem;
+    display: grid;
+    place-items: center;
+    inline-size: clamp(6.5rem, 5rem + 4vw, 8.5rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--wine-900) 92%, transparent);
+    border: 1px solid var(--gold-line);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--wine-900) 60%, transparent), var(--shadow-sm);
+    animation: hero-fade 1.2s var(--ease-out) 700ms both;
+  }
+
+  .hero__seal-ring {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    fill: var(--rose-ancien);
+    font-family: var(--font-body);
+    font-size: 7.4px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    animation: hero-spin 60s linear infinite;
+  }
+
+  :global(:root[lang='ar']) .hero__seal-ring {
+    font-size: 11px;
+    text-transform: none;
+  }
+
+  .hero__seal-core {
+    display: grid;
+    justify-items: center;
+    inline-size: 58%;
+    aspect-ratio: 1;
+    align-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    line-height: 1;
+  }
+
+  .hero__seal-value {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 0.9rem + 0.7vw, 1.5rem);
+    font-weight: var(--weight-light);
+    color: var(--color-heading);
+  }
+
+  .hero__seal-unit {
+    margin-block-start: 0.25rem;
+    font-size: 0.5625rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  :global(:root[lang='ar']) .hero__seal-unit {
+    font-size: 0.75rem;
+  }
+
+  /* ---- Strip ---- */
+  .hero__strip {
+    display: grid;
+    border-block: var(--border-hairline);
+  }
+
+  .hero__strip-item {
+    display: grid;
+    align-content: center;
+    gap: 0.25rem;
+    padding-block: var(--space-sm);
+  }
+
+  .hero__strip-item + .hero__strip-item {
+    border-block-start: var(--border-hairline);
+  }
+
+  .hero__strip .label-caps {
+    font-size: 0.625rem;
+  }
+
+  .hero__strip-value {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: var(--weight-light);
+    line-height: 1.2;
+    color: var(--color-heading);
+  }
+
+  .hero__strip-item--sign {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .hero__signature {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    white-space: nowrap;
+    font-style: italic;
+    font-weight: var(--weight-light);
+    line-height: 1;
+    color: var(--color-accent-text);
+  }
+
+  .hero__tagline {
+    max-inline-size: 15rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.35;
+    color: var(--color-text);
+  }
+
+  :global(:root[lang='ar']) .hero__signature {
+    font-style: normal;
+  }
+
+  /* ---- Entrance ---- */
+  .hero__rise {
+    animation: hero-rise 1s var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  @keyframes hero-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes hero-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__rise,
+    .hero__img,
+    .hero__seal,
+    .hero__seal-ring {
+      animation: none;
+    }
+  }
+
+  /* ---- Tablet: the strip in two columns ---- */
+  @media (min-width: 40em) {
+    .hero__strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hero__strip-item {
+      padding-inline: var(--space-md);
+    }
+
+    .hero__strip-item:nth-child(odd) {
+      padding-inline-start: 0;
+    }
+
+    .hero__strip-item:nth-child(2) {
+      border-block-start: 0;
+      border-inline-start: var(--border-hairline);
+    }
+
+    .hero__strip-item:nth-child(4) {
+      border-inline-start: var(--border-hairline);
+    }
+  }
+
+  /* ---- Desktop: copy and photograph side by side, on one screen ---- */
+  @media (min-width: 64em) {
+    .hero {
+      min-block-size: 100svh;
+      justify-content: space-between;
+      gap: clamp(1.5rem, 3svh, 2.5rem);
+      padding-block-start: calc(var(--header-height) + clamp(1rem, 3svh, 2.5rem));
+    }
+
+    .hero__inner {
+      flex: 1;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(2rem, 4vw, 5rem);
+    }
+
+    .hero__title {
+      font-size: min(clamp(2.75rem, 1.5rem + 1.75vw, 3.25rem), 6svh);
+    }
+
+    .hero__lead {
+      margin-block-start: clamp(0.75rem, 1.6svh, 1rem);
+    }
+
+    .hero__actions {
+      margin-block-start: clamp(1.25rem, 3svh, 1.75rem);
+    }
+
+    .hero__visual {
+      justify-self: center;
+      inline-size: min(100%, 28rem, calc((100svh - var(--header-height) - 19.5rem) * 0.8));
+      margin-inline-end: 2.25rem;
+    }
+
+    .hero__seal {
+      inset-inline-end: -2.25rem;
+    }
+
+    /* The card reaches towards the text, as a bridge between both columns. */
+    .hero__stay {
+      inset-inline: -4rem 1.5rem;
+    }
+
+    .hero__highlights {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-block-start: clamp(1.1rem, 2.8svh, 1.6rem);
+    }
+
+    .hero__highlight {
+      padding-inline: 0.5rem;
+    }
+
+    .hero__highlight:nth-child(even) {
+      border-inline-start: 0;
+    }
+
+    .hero__highlight + .hero__highlight {
+      border-inline-start: 1px solid var(--hairline);
+    }
+
+    .hero__strip {
+      grid-template-columns: 1fr 1.15fr 1fr 1fr;
+    }
+
+    .hero__strip-item {
+      padding-block: clamp(0.75rem, 2svh, 1.15rem);
+      padding-inline: clamp(1rem, 2vw, 2rem);
+    }
+
+    .hero__strip-item + .hero__strip-item {
+      border-block-start: 0;
+      border-inline-start: var(--border-hairline);
+    }
+
+    .hero__strip-item:first-child {
+      padding-inline-start: 0;
+    }
+
+    .hero__strip-item:nth-child(odd) {
+      padding-inline-start: clamp(1rem, 2vw, 2rem);
+    }
+
+    .hero__strip-item:first-child {
+      padding-inline-start: 0;
+    }
+  }
+</style>

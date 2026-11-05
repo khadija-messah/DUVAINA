@@ -1,0 +1,421 @@
+---
+/**
+ * FAQ — compact editorial layout on light ivory.
+ *  - Start side: a fine vertical line with a sparkle, the "FAQ" label, the
+ *    title with its italic powder-rose accent, a short intro and the
+ *    "Poser une question" button; a hairline bloom drifts in the corner.
+ *  - Other side: the questions as small rounded accordions (≈52px closed),
+ *    a number in a fine circle and a "+" button. Two independent columns on
+ *    tablet (48–64em) and from 80em (opening one never moves the other
+ *    column); one list on phones and beside the heading at 64–80em.
+ * Native <details name="faq">: a click opens the answer just below, a second
+ * click closes it, one open at a time. The answer fades in everywhere;
+ * Chromium also animates the height. Logical properties: mirrors in Arabic.
+ */
+import Button from '@/components/ui/Button.astro';
+import Floral from '@/components/ui/Floral.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { getContent, getLang, ui } from '@/i18n';
+import { whatsappHref, isWhatsappConfigured } from '@/config/site';
+
+const lang = getLang(Astro.currentLocale);
+const { faq, forYou } = getContent(lang);
+const t = ui[lang];
+
+// Questions split into two columns (1–5, then 6–9), read in order when stacked.
+const half = Math.ceil(faq.length / 2);
+const columns = [faq.slice(0, half), faq.slice(half)].map((items, c) =>
+  items.map((item, i) => ({ ...item, n: c * half + i + 1 })),
+);
+---
+
+<section id="faq" class="faq-section theme-ivory" aria-labelledby="faq-title">
+  <Floral size={300} class="faq-section__floral" />
+
+  <div class="container faq-section__inner">
+    <header class="faq-section__head" data-reveal>
+      <span class="faq-section__line" aria-hidden="true"><span class="sparkle"></span></span>
+      <p class="faq-section__eyebrow">{t.faqHeading.eyebrow}</p>
+      <h2 id="faq-title" class="faq-section__title" set:html={t.faqHeading.title} />
+      <p class="faq-section__intro">{t.faqHeading.intro}</p>
+      <Button href={whatsappHref(t.questionMessage)} external={isWhatsappConfigured} icon="arrow-right" class="faq-section__cta">
+        {forYou.secondaryCta}
+      </Button>
+    </header>
+
+    <div class="faq" data-reveal style="--reveal-delay: 100ms">
+      {
+        columns.map((items) => (
+          <div class="faq__col">
+            {items.map((item) => (
+              <details class="faq__item" name="faq">
+                <summary class="faq__question">
+                  <span class="faq__num" aria-hidden="true">{String(item.n).padStart(2, '0')}</span>
+                  <span class="faq__q">{item.q}</span>
+                  <span class="faq__toggle" aria-hidden="true">
+                    <Icon name="plus" size={14} />
+                  </span>
+                </summary>
+                <div class="faq__answer">
+                  <p>{item.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="container faq-section__foot" aria-hidden="true">
+    <span class="faq-section__divider"><span class="sparkle"></span></span>
+  </div>
+</section>
+
+<style>
+  .faq-section {
+    --faq-rose: #a5665e; /* powder rose deepened for text: 4.4:1 on ivory */
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3rem, 2.25rem + 3vw, 4.75rem) clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  /* Hairline bloom in the bottom-start corner, very light. */
+  .faq-section :global(.faq-section__floral) {
+    position: absolute;
+    inset-block-end: -5.5rem;
+    inset-inline-start: -5.5rem;
+    inline-size: clamp(11rem, 17vw, 17rem);
+    block-size: auto;
+    color: var(--rose-gold);
+    opacity: 0.32;
+    transform: rotate(18deg);
+  }
+
+  :global([dir='rtl']) .faq-section :global(.faq-section__floral) {
+    transform: rotate(-18deg);
+  }
+
+  .faq-section__inner {
+    position: relative;
+    display: grid;
+    gap: var(--space-xl);
+    max-inline-size: calc(76rem + 2 * var(--gutter));
+  }
+
+  /* ---- Heading ---- */
+  .faq-section__head {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    align-content: start;
+  }
+
+  /* Fine vertical line with a sparkle, on the start edge of the heading. */
+  .faq-section__line {
+    display: none;
+  }
+
+  .faq-section__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--faq-rose);
+  }
+
+  .faq-section__eyebrow::after {
+    content: '';
+    inline-size: 4.5rem;
+    block-size: 1px;
+    background: var(--gold-line);
+  }
+
+  .faq-section__title {
+    margin-block-start: var(--space-sm);
+    font-size: clamp(2.25rem, 1.8rem + 1.6vw, 3.25rem);
+    font-weight: var(--weight-regular);
+    line-height: 1;
+    color: var(--color-heading);
+  }
+
+  .faq-section__title :global(em) {
+    display: block;
+    font-style: italic;
+    font-weight: var(--weight-regular);
+    color: var(--faq-rose);
+  }
+
+  .faq-section__intro {
+    max-inline-size: 22rem;
+    margin-block-start: var(--space-md);
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  .faq-section__head :global(.faq-section__cta) {
+    margin-block-start: var(--space-lg);
+    box-shadow: 0 8px 22px rgb(114 29 53 / 0.18);
+  }
+
+  /* ---- Questions ---- */
+  .faq {
+    display: grid;
+    gap: 0.625rem;
+    align-content: start;
+    interpolate-size: allow-keywords;
+  }
+
+  .faq__col {
+    display: grid;
+    gap: 0.625rem;
+    align-content: start;
+  }
+
+  .faq__item {
+    border: 1px solid color-mix(in srgb, var(--rose-gold) 35%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--white) 70%, var(--ivory));
+    box-shadow: 0 1px 2px rgb(66 18 31 / 0.03);
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .faq__item:hover {
+    border-color: color-mix(in srgb, var(--rose-gold) 65%, transparent);
+  }
+
+  .faq__item[open] {
+    border-color: color-mix(in srgb, var(--rose-gold) 70%, transparent);
+    box-shadow: 0 8px 22px rgb(66 18 31 / 0.06);
+  }
+
+  .faq__question {
+    display: grid;
+    grid-template-columns: 1.875rem minmax(0, 1fr) 1.875rem;
+    align-items: center;
+    gap: 0.75rem;
+    min-block-size: 3.25rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: inherit;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__question:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .faq__num,
+  .faq__toggle {
+    display: grid;
+    place-items: center;
+    inline-size: 1.875rem;
+    block-size: 1.875rem;
+    border: 1px solid color-mix(in srgb, var(--rose-gold) 55%, transparent);
+    border-radius: 50%;
+  }
+
+  .faq__num {
+    font-size: 0.6875rem;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+    color: var(--faq-rose);
+  }
+
+  .faq__q {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: var(--weight-medium);
+    line-height: 1.2;
+    color: var(--color-heading);
+  }
+
+  .faq__toggle {
+    color: var(--black-cherry);
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      color var(--duration-base) var(--ease-out);
+  }
+
+  .faq__question:hover .faq__toggle {
+    border-color: var(--black-cherry);
+  }
+
+  .faq__item[open] .faq__toggle {
+    transform: rotate(45deg);
+    background: var(--black-cherry);
+    border-color: var(--black-cherry);
+    color: var(--champagne);
+  }
+
+  /* Height animation where supported (Chromium 131+). */
+  .faq__item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size var(--duration-base) var(--ease-out),
+      content-visibility var(--duration-base) allow-discrete;
+  }
+
+  .faq__item[open]::details-content {
+    block-size: auto;
+  }
+
+  /* Answer just below the question, aligned with its text. */
+  .faq__answer {
+    padding: 0 0.75rem 0.85rem;
+    padding-inline-start: calc(0.75rem + 1.875rem + 0.75rem);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-light);
+    line-height: 1.65;
+    color: var(--color-text-muted);
+  }
+
+  .faq__item[open] .faq__answer {
+    animation: faq-answer var(--duration-base) var(--ease-out);
+  }
+
+  @keyframes faq-answer {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---- Bottom divider with a sparkle ---- */
+  .faq-section__foot {
+    position: relative;
+    max-inline-size: calc(76rem + 2 * var(--gutter));
+    margin-block-start: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .faq-section__divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .faq-section__divider::before,
+  .faq-section__divider::after {
+    content: '';
+    flex: 1;
+    block-size: 1px;
+    background: color-mix(in srgb, var(--rose-gold) 40%, transparent);
+  }
+
+  /* ---- Arabic ---- */
+  :global(:root[lang='ar']) .faq-section__eyebrow {
+    font-size: 0.875rem;
+    text-transform: none;
+  }
+
+  :global(:root[lang='ar']) .faq-section__title :global(em) {
+    font-style: normal;
+  }
+
+  :global(:root[lang='ar']) .faq__q {
+    font-size: 1.0625rem;
+    font-weight: var(--weight-regular);
+    line-height: 1.55 !important;
+  }
+
+  :global(:root[lang='ar']) .faq__answer {
+    font-size: 0.9375rem;
+  }
+
+  /* ---- Phones ---- */
+  @media (max-width: 39.99em) {
+    .faq__question {
+      gap: 0.625rem;
+      padding-inline: 0.625rem;
+    }
+
+    .faq__answer {
+      padding-inline: 0.75rem;
+    }
+
+    .faq-section :global(.faq-section__floral) {
+      opacity: 0.18;
+    }
+  }
+
+  /* ---- Tablet: heading above, the questions in two columns ---- */
+  @media (min-width: 48em) and (max-width: 63.99em) {
+    .faq {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.625rem 1rem;
+      align-items: start;
+    }
+  }
+
+  /* ---- Desktop: heading beside the questions ---- */
+  @media (min-width: 64em) {
+    .faq-section__inner {
+      grid-template-columns: minmax(15rem, 0.3fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 4vw, 4.5rem);
+      align-items: start;
+    }
+
+    .faq-section__head {
+      padding-inline-start: 2rem;
+    }
+
+    .faq-section__line {
+      position: absolute;
+      inset-block: -0.5rem 45%;
+      inset-inline-start: 0;
+      display: block;
+      inline-size: 1px;
+      background: linear-gradient(var(--gold-line), var(--gold-line)) top / 1px calc(50% - 0.75rem) no-repeat,
+        linear-gradient(var(--gold-line), var(--gold-line)) bottom / 1px calc(50% - 0.75rem) no-repeat;
+    }
+
+    .faq-section__line .sparkle {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      translate: -50% -50%;
+    }
+
+    :global([dir='rtl']) .faq-section__line .sparkle {
+      translate: 50% -50%;
+    }
+  }
+
+  /* Wide screens: the questions in two independent columns. */
+  @media (min-width: 80em) {
+    .faq {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.625rem 1rem;
+      align-items: start;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq__item::details-content {
+      transition: none;
+    }
+
+    .faq__item[open] .faq__answer {
+      animation: none;
+    }
+  }
+</style>

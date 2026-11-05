@@ -1,0 +1,473 @@
+---
+/**
+ * Hero promo "hôtels 5 étoiles": a cream panel built in HTML/CSS, with real text
+ * from the content files, individual photos, inline SVG icons and blossoms.
+ * A size container: beside the cards when it is wide, stacked when narrow.
+ * Logical properties mirror it for Arabic; photos are never mirrored.
+ */
+import Icon from '@/components/ui/Icon.astro';
+import Blossom from '@/components/ui/Blossom.astro';
+import HotelDestinationCard from '@/components/ui/HotelDestinationCard.astro';
+import { getContent, getLang } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const { heroPromo: p } = getContent(lang);
+---
+
+<aside class="hpromo" aria-labelledby="hpromo-title">
+  <div class="hpromo__decor" aria-hidden="true">
+    <Blossom class="hpromo__flower hpromo__flower--top" size={118} rotate={12} />
+    <Blossom class="hpromo__flower hpromo__flower--top2" size={70} rotate={-20} />
+    <Blossom class="hpromo__flower hpromo__flower--side" size={92} rotate={30} />
+    <Blossom class="hpromo__flower hpromo__flower--low" size={64} rotate={-8} />
+    <Blossom variant="petal" class="hpromo__petal hpromo__petal--1" size={14} rotate={40} />
+    <Blossom variant="petal" class="hpromo__petal hpromo__petal--2" size={11} rotate={-35} />
+    <Blossom variant="petal" class="hpromo__petal hpromo__petal--3" size={13} rotate={70} />
+  </div>
+
+  <div class="hpromo__inner">
+    <div class="hpromo__intro">
+      <p class="hpromo__eyebrow">{p.eyebrow}</p>
+      <h2 id="hpromo-title" class="hpromo__title" set:html={p.title} />
+      <p class="hpromo__text">{p.intro}</p>
+
+      <ul role="list" class="hpromo__benefits">
+        {
+          p.benefits.map((b) => (
+            <li class="hpromo__benefit">
+              <span class="hpromo__benefit-icon" aria-hidden="true">
+                <Icon name={b.icon} size={24} />
+              </span>
+              <span class="hpromo__benefit-label">{b.label}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="hpromo__audience">
+        <span class="hpromo__audience-icon" aria-hidden="true"><Icon name="woman" size={44} /></span>
+        <span class="hpromo__audience-text">
+          <span class="hpromo__audience-kicker">{p.audience.kicker}</span>
+          <span class="hpromo__audience-value">{p.audience.value}</span>
+        </span>
+        <Blossom class="hpromo__audience-flower" size={50} rotate={-14} />
+      </p>
+
+      <a class="hpromo__cta" href={p.cta.href}>
+        {p.cta.label}
+        <Icon name="arrow-right" size={18} />
+      </a>
+    </div>
+
+    <ul role="list" class="hpromo__cards">
+      {
+        p.destinations.map((d) => (
+          <li>
+            <HotelDestinationCard
+              icon={d.icon}
+              prefix={d.prefix}
+              city={d.city}
+              scene={d.scene}
+              room={d.room}
+              starsLabel={p.starsLabel}
+              indicators={p.indicators}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</aside>
+
+<style>
+  .hpromo {
+    container: hpromo / inline-size;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--rose-gold) 45%, transparent);
+    border-radius: 14px;
+    background:
+      radial-gradient(55% 45% at 0% 100%, color-mix(in srgb, var(--rose-gold) 20%, transparent), transparent 70%),
+      radial-gradient(45% 35% at 100% 0%, color-mix(in srgb, var(--rose-gold) 14%, transparent), transparent 70%),
+      linear-gradient(150deg, color-mix(in srgb, var(--champagne) 18%, var(--white)), color-mix(in srgb, var(--champagne) 48%, var(--white)));
+    box-shadow: 0 24px 60px rgb(28 11 18 / 0.35);
+    color: var(--near-black);
+  }
+
+  /* ---- Decor (blossoms and loose petals) ---- */
+  .hpromo__decor {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+
+  .hpromo__decor :global(.blossom) {
+    position: absolute;
+  }
+
+  .hpromo__decor :global(.hpromo__flower--top) {
+    inset-block-start: -38px;
+    inset-inline-end: -30px;
+    opacity: 0.95;
+  }
+
+  .hpromo__decor :global(.hpromo__flower--top2) {
+    inset-block-start: 46px;
+    inset-inline-end: -26px;
+    opacity: 0.85;
+  }
+
+  .hpromo__decor :global(.hpromo__flower--side) {
+    inset-block-start: 40%;
+    inset-inline-start: -46px;
+    opacity: 0.9;
+  }
+
+  .hpromo__decor :global(.hpromo__flower--low) {
+    inset-block-end: -22px;
+    inset-inline-start: 18%;
+    opacity: 0.75;
+  }
+
+  .hpromo__decor :global(.hpromo__petal--1) {
+    inset-block-start: 0.5rem;
+    inset-inline-start: 54%;
+  }
+
+  .hpromo__decor :global(.hpromo__petal--2) {
+    inset-block-end: 9%;
+    inset-inline-end: 6%;
+  }
+
+  .hpromo__decor :global(.hpromo__petal--3) {
+    inset-block-start: 72%;
+    inset-inline-start: 0.4rem;
+    opacity: 0.8;
+  }
+
+  /* ---- Layout ---- */
+  .hpromo__inner {
+    display: grid;
+    gap: clamp(1.5rem, 4cqi, 2rem);
+    padding: clamp(1.25rem, 4.2cqi, 2.5rem);
+  }
+
+  .hpromo__intro {
+    container: hpromo-intro / inline-size;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hpromo__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--black-cherry-dark) 85%, transparent);
+  }
+
+  .hpromo__eyebrow::after {
+    content: '';
+    inline-size: 2.5rem;
+    block-size: 1px;
+    background: var(--rose-gold);
+  }
+
+  .hpromo__title {
+    margin-block-start: 0.6rem;
+    font-size: clamp(1.85rem, 1.1rem + 6cqi, 2.75rem);
+    font-weight: var(--weight-medium, 500);
+    line-height: 1.04;
+    color: var(--black-cherry);
+    text-wrap: balance;
+  }
+
+  .hpromo__title :global(em) {
+    font-style: normal;
+    white-space: nowrap;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--rose-gold) 75%, var(--champagne)), color-mix(in srgb, var(--rose-gold) 80%, var(--black-cherry)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hpromo__text {
+    max-inline-size: 34rem;
+    margin-block-start: 0.85rem;
+    font-size: clamp(0.875rem, 0.8rem + 0.35cqi, 1rem);
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--near-black) 80%, transparent);
+  }
+
+  /* Four benefits, separated by fine Rose Gold rules. */
+  .hpromo__benefits {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 0.5rem;
+    inline-size: 100%;
+    margin-block-start: 1.25rem;
+  }
+
+  .hpromo__benefit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    text-align: center;
+  }
+
+  .hpromo__benefit-icon {
+    display: grid;
+    place-items: center;
+    inline-size: 3.25rem;
+    block-size: 3.25rem;
+    border: 1px solid color-mix(in srgb, var(--rose-gold) 40%, transparent);
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 35%, var(--white), color-mix(in srgb, var(--rose-gold) 24%, var(--white)));
+    box-shadow: 0 4px 10px rgb(114 29 53 / 0.1);
+    color: var(--black-cherry);
+  }
+
+  .hpromo__benefit-icon :global(svg) {
+    stroke-width: 1.35;
+  }
+
+  .hpromo__benefit-label {
+    max-inline-size: 9rem;
+    font-size: 0.75rem;
+    font-weight: var(--weight-medium, 500);
+    line-height: 1.3;
+    color: color-mix(in srgb, var(--near-black) 88%, transparent);
+  }
+
+  /* Women-only card. */
+  .hpromo__audience {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    inline-size: 100%;
+    margin-block-start: 1.25rem;
+    padding-block: 0.8rem;
+    padding-inline: 1rem 3.25rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--rose-gold) 40%, transparent);
+    border-radius: 14px;
+    background: linear-gradient(90deg, var(--white), color-mix(in srgb, var(--rose-gold) 12%, var(--white)));
+    box-shadow: 0 6px 16px rgb(114 29 53 / 0.08);
+  }
+
+  .hpromo__audience-icon {
+    flex: none;
+    color: var(--black-cherry);
+  }
+
+  .hpromo__audience-icon :global(svg) {
+    stroke-width: 1;
+  }
+
+  .hpromo__audience-text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .hpromo__audience-kicker {
+    font-size: 0.6875rem;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--black-cherry);
+  }
+
+  .hpromo__audience-value {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.2rem + 1.2cqi, 1.875rem);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--black-cherry);
+  }
+
+  .hpromo__audience :global(.hpromo__audience-flower) {
+    position: absolute;
+    inset-inline-end: -0.4rem;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    opacity: 0.9;
+  }
+
+  /* Burgundy pill call to action. */
+  .hpromo__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    margin-block-start: 1.25rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--black-cherry) 88%, var(--rose-gold)), var(--black-cherry-dark));
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--rose-gold) 55%, transparent),
+      0 10px 22px rgb(114 29 53 / 0.3);
+    font-size: 1rem;
+    font-weight: var(--weight-medium, 500);
+    color: var(--champagne);
+    text-decoration: none;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .hpromo__cta:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--rose-gold) 70%, transparent),
+      0 14px 28px rgb(114 29 53 / 0.36);
+  }
+
+  .hpromo__cta:focus-visible {
+    outline: 2px solid var(--black-cherry);
+    outline-offset: 3px;
+  }
+
+  /* ---- Cards ---- */
+  .hpromo__cards {
+    display: grid;
+    gap: 1.25rem;
+    inline-size: 100%;
+    max-inline-size: 22rem;
+    margin-inline: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hpromo__cta:hover {
+      transform: none;
+    }
+  }
+
+  /* Narrow: the corner blossoms step back so they never sit under the title. */
+  @container hpromo (max-width: 29.99rem) {
+    .hpromo__decor :global(.hpromo__flower--top) {
+      inset-block-start: -62px;
+      inset-inline-end: -58px;
+    }
+
+    .hpromo__decor :global(.hpromo__flower--top2) {
+      display: none;
+    }
+  }
+
+  /* Medium: the two cards side by side. */
+  /* Benefits on one row once the copy column has room for four labels. */
+  @container hpromo-intro (min-width: 27rem) {
+    .hpromo__benefits {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .hpromo__benefit + .hpromo__benefit {
+      border-inline-start: 1px solid color-mix(in srgb, var(--rose-gold) 35%, transparent);
+    }
+
+    .hpromo__benefit {
+      padding-inline: 0.35rem;
+    }
+  }
+
+  @container hpromo (min-width: 30rem) {
+    .hpromo__cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.75rem, 2.4cqi, 1.25rem);
+      max-inline-size: none;
+    }
+
+    .hpromo__cta {
+      inline-size: auto;
+      min-inline-size: 16rem;
+    }
+  }
+
+  /* Wide: copy on the start side, the two cards beside it (brand layout). */
+  @container hpromo (min-width: 46rem) {
+    .hpromo__inner {
+      grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
+      align-items: center;
+      gap: clamp(1.25rem, 2.6cqi, 2rem);
+      /* Desktop hero: vertical rhythm follows the screen height (svh). */
+      padding: clamp(1rem, 3svh, 2rem) clamp(1.25rem, 2.4cqi, 2rem);
+    }
+
+    .hpromo__title {
+      margin-block-start: 0.45rem;
+      font-size: min(clamp(1.6rem, 0.9rem + 5.5cqi, 2.6rem), 5svh);
+    }
+
+    .hpromo__text {
+      margin-block-start: clamp(0.5rem, 1.4svh, 0.85rem);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .hpromo__benefits {
+      margin-block-start: clamp(0.75rem, 2svh, 1.25rem);
+    }
+
+    .hpromo__benefit-icon {
+      inline-size: clamp(2.5rem, 5.4svh, 3.25rem);
+      block-size: clamp(2.5rem, 5.4svh, 3.25rem);
+    }
+
+    .hpromo__audience {
+      margin-block-start: clamp(0.7rem, 1.8svh, 1.25rem);
+      padding-block: clamp(0.45rem, 1.2svh, 0.8rem);
+    }
+
+    .hpromo__audience-icon :global(svg) {
+      inline-size: clamp(2.25rem, 5svh, 2.75rem);
+      block-size: auto;
+    }
+
+    .hpromo__cta {
+      inline-size: 100%;
+      min-block-size: clamp(2.75rem, 5.8svh, 3.25rem);
+      margin-block-start: clamp(0.7rem, 1.8svh, 1.25rem);
+      padding-block: 0.6rem;
+    }
+
+    /* Cards never taller than the space under the navbar. */
+    .hpromo__cards {
+      max-inline-size: calc(2 * (100svh - var(--header-height) - 12svh - 6.5rem) / 1.45 + 1.25rem);
+      margin-inline: auto;
+    }
+  }
+
+  /* ---- Arabic ---- */
+  :global(:root[lang='ar']) .hpromo__eyebrow,
+  :global(:root[lang='ar']) .hpromo__audience-kicker {
+    font-size: 0.875rem;
+  }
+
+  :global(:root[lang='ar']) .hpromo__benefit-label {
+    font-size: 0.8125rem;
+  }
+
+  :global(:root[lang='ar']) .hpromo__title {
+    font-weight: var(--weight-bold, 700);
+  }
+
+  :global(:root[lang='ar']) .hpromo__audience-value {
+    font-size: clamp(1.2rem, 0.95rem + 1cqi, 1.6rem);
+    line-height: 1.3;
+    white-space: nowrap;
+    text-transform: none;
+  }
+</style>

@@ -1,0 +1,382 @@
+---
+/**
+ * "Le parcours d'une pèlerine" — the eight moments of the Omra programme,
+ * in their fixed order, as editorial chapters (content: journeyStory).
+ *  - immersive: full-bleed photograph with a translucent wine panel (≥64em);
+ *    on smaller screens the panel sits below the image.
+ *  - image-left / image-right: alternating spreads, the photo in a fine
+ *    offset gold frame, a large light numeral beside the text.
+ */
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/Button.astro';
+import { getContent, getLang, mediaAlt } from '@/i18n';
+import { media } from '@/config/media';
+
+const lang = getLang(Astro.currentLocale);
+const { journeyStory } = getContent(lang);
+
+const total = String(journeyStory.stages.length).padStart(2, '0');
+---
+
+<section id="parcours" class="journey theme-ivory" aria-labelledby="journey-title">
+  <header class="journey__head container" data-reveal>
+    <div class="journey__head-main">
+      <p class="eyebrow">{journeyStory.eyebrow}</p>
+      <h2 id="journey-title" class="journey__title" set:html={journeyStory.title} />
+    </div>
+    <div class="journey__head-side">
+      <p class="journey__intro">{journeyStory.intro}</p>
+      <p class="journey__note">{journeyStory.note}</p>
+    </div>
+  </header>
+
+  <ol role="list" class="journey__list">
+    {
+      journeyStory.stages.map((stage, i) => {
+        const item = media[stage.slot];
+        const num = String(i + 1).padStart(2, '0');
+        const titleId = `journey-stage-${i + 1}`;
+        const text = (
+          <>
+            <p class="chapter__num" aria-hidden="true">
+              <bdi dir="ltr">{num}<span class="chapter__total"> / {total}</span></bdi>
+            </p>
+            <p class="chapter__meta">
+              <span class="visually-hidden">{num} / {total} — </span>
+              <span class="chapter__label">{stage.label}</span>
+            </p>
+            <h3 id={titleId} class="chapter__title">{stage.title}</h3>
+            <p class="chapter__text">{stage.text}</p>
+            {'note' in stage && stage.note && <p class="chapter__note">{stage.note}</p>}
+            {'cta' in stage && stage.cta && (
+              <div class="chapter__cta">
+                <Button href={stage.cta.href} icon="arrow-right">{stage.cta.label}</Button>
+              </div>
+            )}
+          </>
+        );
+
+        return (
+          <li
+            class:list={['chapter', `chapter--${stage.layout}`]}
+            aria-labelledby={titleId}
+          >
+            {stage.layout === 'immersive' ? (
+              <div class="immersive">
+                <figure class="immersive__media">
+                  <Image
+                    src={item.src!}
+                    alt={mediaAlt(stage.slot, lang)}
+                    widths={[640, 960, 1280, 1536]}
+                    sizes="100vw"
+                    loading="lazy"
+                    class="immersive__img"
+                    style={item.position ? `object-position: ${item.position}` : undefined}
+                  />
+                </figure>
+                <div class="immersive__panel theme-dark" data-reveal>{text}</div>
+              </div>
+            ) : (
+              <div class="split container">
+                <figure class="split__media" data-reveal>
+                  <Image
+                    src={item.src!}
+                    alt={mediaAlt(stage.slot, lang)}
+                    widths={[640, 960, 1280, 1536]}
+                    sizes="(min-width: 64em) 56vw, 100vw"
+                    loading="lazy"
+                    class="split__img"
+                    style={item.position ? `object-position: ${item.position}` : undefined}
+                  />
+                </figure>
+                <div class="split__text" data-reveal style="--reveal-delay: 120ms">{text}</div>
+              </div>
+            )}
+          </li>
+        );
+      })
+    }
+  </ol>
+</section>
+
+<style>
+  .journey {
+    padding-block-start: var(--section-space);
+  }
+
+  /* ---- Intro ---- */
+  .journey__head {
+    display: grid;
+    gap: var(--space-lg);
+    margin-block-end: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+  }
+
+  .journey__head-main {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .journey__title {
+    font-size: var(--text-3xl);
+    line-height: 1.06;
+  }
+
+  .journey__intro {
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .journey__note {
+    margin-block-start: var(--space-sm);
+    font-size: var(--text-xs);
+    font-style: italic;
+    color: var(--color-text-muted);
+  }
+
+  /* ---- Chapter text (shared) ---- */
+  .chapter__num {
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 2rem + 2.4vw, 4.25rem);
+    font-weight: var(--weight-light);
+    line-height: 0.9;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--color-accent-text) 65%, transparent);
+  }
+
+  .chapter__total {
+    font-size: 0.24em;
+    letter-spacing: 0.14em;
+    color: var(--color-text-muted);
+    -webkit-text-stroke: 0;
+  }
+
+  .chapter__meta {
+    margin-block-start: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .chapter__meta::before {
+    content: '';
+    flex: none;
+    inline-size: 1.75rem;
+    block-size: 1px;
+    background: var(--gold-line);
+  }
+
+  .chapter__title {
+    margin-block-start: var(--space-sm);
+    font-size: var(--text-2xl);
+    line-height: 1.12;
+  }
+
+  .chapter__text {
+    margin-block-start: var(--space-md);
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .chapter__note {
+    margin-block-start: var(--space-md);
+    padding-inline-start: var(--space-sm);
+    border-inline-start: 1px solid var(--gold-line);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  .chapter__cta {
+    margin-block-start: var(--space-lg);
+  }
+
+  /* ---- Split chapters ---- */
+  .chapter--image-left,
+  .chapter--image-right {
+    padding-block: clamp(2.5rem, 2rem + 2.5vw, 4rem);
+  }
+
+  .chapter--image-left + .chapter--image-left,
+  .chapter--image-left + .chapter--image-right,
+  .chapter--image-right + .chapter--image-left {
+    position: relative;
+  }
+
+  .chapter--image-left + .chapter--image-right::before,
+  .chapter--image-right + .chapter--image-left::before,
+  .chapter--image-left + .chapter--image-left::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: max(var(--gutter), (100% - var(--container-max)) / 2);
+    block-size: 1px;
+    background: var(--hairline);
+  }
+
+  .split {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .split__media {
+    position: relative;
+    inline-size: min(100% - 0.75rem, 36rem);
+    margin: 0.75rem 0.75rem 0 0;
+  }
+
+  /* Fine gold frame offset behind the image. */
+  .split__media::before {
+    content: '';
+    position: absolute;
+    inset: -0.75rem -0.75rem 0.75rem 0.75rem;
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius-lg);
+    pointer-events: none;
+  }
+
+  .split__img {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .split__text {
+    max-inline-size: 30rem;
+  }
+
+  /* ---- Immersive chapters ---- */
+  .immersive {
+    position: relative;
+  }
+
+  .immersive__media {
+    margin: 0;
+  }
+
+  .immersive__img {
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  /* Small screens: text on a solid panel below the image. */
+  .immersive__panel {
+    padding: var(--space-xl) var(--gutter) var(--space-2xl);
+    background: var(--wine-950);
+  }
+
+  /* ---- Desktop ---- */
+  @media (min-width: 64em) {
+    .journey__head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 7rem);
+      align-items: end;
+    }
+
+    .split {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 1.5rem + 3vw, 5rem);
+    }
+
+    /* Alternate: image on the end side for "image-right" chapters. */
+    .chapter--image-right .split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    }
+
+    .chapter--image-right .split__media {
+      order: 2;
+      justify-self: end;
+      margin: 0.75rem 0 0 0.75rem;
+    }
+
+    .chapter--image-right .split__media::before {
+      inset: -0.75rem 0.75rem 0.75rem -0.75rem;
+    }
+
+    .chapter--image-right .split__text {
+      justify-self: end;
+    }
+
+    /* Full-bleed image; the text sits in a translucent wine panel at the
+       bottom-start, legible whatever the photo behind it. */
+    .immersive {
+      min-block-size: min(76vh, 44rem);
+      display: grid;
+      align-items: end;
+    }
+
+    .immersive__media {
+      position: absolute;
+      inset: 0;
+    }
+
+    .immersive__img {
+      block-size: 100%;
+      aspect-ratio: auto;
+    }
+
+    .immersive__media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgb(36 5 13 / 0.7), transparent 50%);
+    }
+
+    .immersive__panel {
+      position: relative;
+      max-inline-size: 32rem;
+      margin: 0 0 clamp(2.5rem, 1.5rem + 3vw, 4.5rem) max(var(--gutter), calc((100vw - var(--container-max)) / 2));
+      padding: clamp(1.75rem, 1.25rem + 1.5vw, 2.75rem);
+      background: rgb(36 5 13 / 0.78);
+      border: 1px solid var(--gold-line);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* RTL: photos are not mirrored; keep the panel on the left, clear of the Kaaba. */
+    :global([dir='rtl']) .immersive__panel {
+      margin-inline-start: auto;
+      margin-inline-end: max(var(--gutter), calc((100vw - var(--container-max)) / 2));
+    }
+
+    .immersive__panel .chapter__num {
+      font-size: clamp(2.5rem, 2rem + 1.5vw, 3.5rem);
+    }
+  }
+
+  /* RTL: the offset frames mirror with the layout. */
+  :global([dir='rtl']) .split__media {
+    margin: 0.75rem 0 0 0.75rem;
+  }
+
+  :global([dir='rtl']) .split__media::before {
+    inset: -0.75rem 0.75rem 0.75rem -0.75rem;
+  }
+
+  @media (min-width: 64em) {
+    :global([dir='rtl']) .chapter--image-right .split__media {
+      margin: 0.75rem 0.75rem 0 0;
+    }
+
+    :global([dir='rtl']) .chapter--image-right .split__media::before {
+      inset: -0.75rem -0.75rem 0.75rem 0.75rem;
+    }
+  }
+</style>

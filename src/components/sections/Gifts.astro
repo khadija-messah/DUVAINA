@@ -1,0 +1,226 @@
+---
+/**
+ * "Ce que nous vous offrons" — the three welcome gifts (bag, guide, tasbih)
+ * around the brand visual. The visual is the gifts area of the supplied image;
+ * titles and descriptions are live text so they stay readable on every screen.
+ * Desktop: the three items sit under their object in the image (bag ≈25%,
+ * guide 50%, tasbih ≈79% of its width), icons straddling the image edge.
+ */
+import { Image } from 'astro:assets';
+import Icon from '@/components/ui/Icon.astro';
+import { getContent, getLang } from '@/i18n';
+import giftsImage from '@/assets/images/gifts/cadeaux-duvania.webp';
+
+const lang = getLang(Astro.currentLocale);
+const { gifts } = getContent(lang);
+---
+
+<section id="cadeaux" class="gifts theme-ivory" aria-labelledby="gifts-title">
+  <div class="container gifts__container">
+    <header class="gifts__head" data-reveal>
+      <p class="eyebrow">{gifts.eyebrow}</p>
+      <h2 id="gifts-title" set:html={gifts.title} />
+      <p class="lead muted">{gifts.intro}</p>
+    </header>
+
+    <figure class="gifts__visual" data-reveal style="--reveal-delay: 100ms">
+      <Image
+        src={giftsImage}
+        alt={gifts.imageAlt}
+        widths={[640, 960, 1280, 1536]}
+        sizes="(min-width: 92em) 1408px, 100vw"
+        loading="lazy"
+        class="gifts__img"
+      />
+    </figure>
+
+    <ul role="list" class="gifts__items">
+      {
+        gifts.items.map((item, i) => (
+          <li class="gift" data-reveal style={`--reveal-delay: ${180 + i * 90}ms`}>
+            <span class="gift__icon" aria-hidden="true">
+              <Icon name={item.icon} size={26} />
+            </span>
+            <h3 class:list={['gift__title', item.titleLang === 'ar' && 'gift__title--ar arabic']} lang={item.titleLang}>
+              {item.title}
+            </h3>
+            {item.subtitle && <p class="gift__subtitle">{item.subtitle}</p>}
+            <p class="gift__text">{item.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .gifts {
+    padding-block: var(--section-space);
+  }
+
+  .gifts__head :global(h2) {
+    font-size: var(--text-3xl);
+  }
+
+  .gifts__container {
+    max-inline-size: calc(var(--container-wide) + 2 * var(--gutter));
+  }
+
+  /* ---- Heading ---- */
+  .gifts__head {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: center;
+    max-inline-size: var(--container-narrow);
+    margin: 0 auto var(--space-xl);
+    text-align: center;
+  }
+
+  .gifts__head p {
+    margin-inline: auto;
+  }
+
+  /* ---- Visual ---- */
+  .gifts__visual {
+    position: relative;
+    margin: 0;
+  }
+
+  /* Hairline Rose Gold frame, offset like the other editorial images. */
+  .gifts__visual::before {
+    content: '';
+    position: absolute;
+    inset: -0.6rem;
+    border: 1px solid var(--gold-line);
+    border-radius: calc(var(--radius-lg) + 6px);
+    pointer-events: none;
+  }
+
+  .gifts__img {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 2.1 / 1;
+    object-fit: cover;
+    object-position: 50% 60%;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ---- Items ---- */
+  .gifts__items {
+    position: relative;
+    display: grid;
+    gap: var(--space-xl);
+    margin-block-start: calc(-1 * 1.875rem);
+  }
+
+  .gift {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  /* Pale champagne disc with a Rose Gold ring, as in the brand visual. */
+  .gift__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 3.75rem;
+    block-size: 3.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--gold-line);
+    background: var(--color-bg);
+    box-shadow: 0 0 0 6px var(--color-bg), var(--shadow-sm);
+    color: var(--color-ornament);
+  }
+
+  .gift__icon :global(svg) {
+    stroke-width: 1.2;
+  }
+
+  .gift__title {
+    margin-block-start: var(--space-md);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-regular);
+    line-height: 1.15;
+    color: var(--color-heading);
+  }
+
+  .gift__title--ar {
+    font-size: calc(var(--text-xl) * 1.05);
+    font-weight: var(--weight-regular);
+    line-height: 1.4;
+  }
+
+  .gift__subtitle {
+    margin-block-start: var(--space-3xs);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .gift__text {
+    max-inline-size: 17rem;
+    margin-block-start: var(--space-xs);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  /* ---- Tablet: three columns ---- */
+  @media (min-width: 48em) {
+    .gifts__img {
+      aspect-ratio: 1536 / 467;
+    }
+
+    /* Shared rows (icon, title, subtitle, text) so the three columns line up
+       even though only the guide has a subtitle. */
+    .gifts__items {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(4, auto);
+      gap: 0 var(--space-lg);
+    }
+
+    .gift {
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      align-items: start;
+    }
+
+    .gift__icon {
+      grid-row: 1;
+    }
+
+    .gift__title {
+      grid-row: 2;
+      align-self: end;
+    }
+
+    .gift__subtitle {
+      grid-row: 3;
+    }
+
+    .gift__text {
+      grid-row: 4;
+    }
+
+    /* RTL: keep each item under its object (bag left, guide centre, tasbih right). */
+    :global([dir='rtl']) .gifts__items {
+      direction: ltr;
+    }
+
+    :global([dir='rtl']) .gift {
+      direction: rtl;
+    }
+  }
+
+  /* ---- Desktop: each item centred under its object in the visual ---- */
+  @media (min-width: 64em) {
+    .gifts__items {
+      inline-size: 81%;
+      margin-inline: auto;
+    }
+  }
+</style>

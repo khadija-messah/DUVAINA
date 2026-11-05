@@ -1,0 +1,129 @@
+---
+/**
+ * Image frame with the brand's arch silhouette.
+ * Renders an optimised <Image> when the media slot has a source, otherwise a
+ * soft Rose Gold-tinted placeholder, so layouts hold before
+ * photography is supplied. The art-direction brief is visible in dev only.
+ */
+import { Image } from 'astro:assets';
+import { media, type MediaKey, type MediaSlot } from '@/config/media';
+
+interface Props {
+  slot: MediaKey;
+  shape?: 'arch' | 'rect';
+  ratio?: string;
+  sizes?: string;
+  priority?: boolean;
+  /** Inset champagne hairline inside the frame. */
+  inset?: boolean;
+  class?: string;
+}
+
+const {
+  slot,
+  shape = 'arch',
+  ratio = '4 / 5',
+  sizes = '(min-width: 64em) 40vw, 100vw',
+  priority = false,
+  inset = true,
+  class: className,
+} = Astro.props;
+
+const item: MediaSlot = media[slot];
+const showBrief = import.meta.env.DEV;
+---
+
+<figure class:list={['frame', `frame--${shape}`, inset && 'frame--inset', className]} style={`--ratio: ${ratio}`}>
+  {
+    item.src ? (
+      <Image
+        src={item.src}
+        alt={item.alt}
+        sizes={sizes}
+        widths={[480, 768, 1080, 1440, 1920]}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : 'auto'}
+        class="frame__img"
+        style={[
+          item.position && `object-position: ${item.position}; transform-origin: ${item.position}`,
+          item.zoom && `--zoom: ${item.zoom}`,
+        ]
+          .filter(Boolean)
+          .join('; ') || undefined}
+      />
+    ) : (
+      <div class="frame__placeholder" role="img" aria-label={item.alt}>
+        {showBrief && <span class="frame__brief">{item.brief}</span>}
+      </div>
+    )
+  }
+</figure>
+
+<style>
+  .frame {
+    position: relative;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    background: var(--rose-tint);
+    isolation: isolate;
+  }
+
+  .frame--arch {
+    border-radius: var(--radius-arch-soft);
+  }
+
+  .frame--rect {
+    border-radius: var(--radius-lg);
+  }
+
+  .frame__img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transform: scale(var(--zoom, 1));
+    transition: transform 1.6s var(--ease-out);
+  }
+
+  .frame:hover .frame__img {
+    transform: scale(calc(var(--zoom, 1) * 1.025));
+  }
+
+  /* Fine Champagne hairline inset within the photo. */
+  .frame--inset::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    z-index: 1;
+    border: 1px solid color-mix(in srgb, var(--champagne) 60%, transparent);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .frame__placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: var(--space-lg);
+    background:
+      radial-gradient(90% 60% at 50% 0%, var(--white), transparent 70%),
+      var(--rose-tint);
+  }
+
+  .frame__brief {
+    max-inline-size: 30ch;
+    padding: var(--space-2xs) var(--space-xs);
+    background: var(--white);
+    border: 1px dashed var(--rose-gold);
+    border-radius: var(--radius-sm);
+    color: var(--near-black);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame:hover .frame__img {
+      transform: scale(var(--zoom, 1));
+    }
+  }
+</style>

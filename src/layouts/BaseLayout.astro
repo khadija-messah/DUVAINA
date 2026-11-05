@@ -1,0 +1,99 @@
+---
+import '@fontsource-variable/cormorant-garamond/wght.css';
+import '@fontsource-variable/cormorant-garamond/wght-italic.css';
+import '@fontsource-variable/manrope/wght.css';
+import '@fontsource/amiri/arabic-400.css';
+import '@fontsource/amiri/arabic-700.css';
+// Latin subset: Western digits in Arabic headings ("5 نجوم") stay in Amiri.
+import '@fontsource/amiri/latin-400.css';
+import '@fontsource/amiri/latin-700.css';
+import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
+import '@fontsource/ibm-plex-sans-arabic/arabic-500.css';
+import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+import MobileContactBar from '@/components/layout/MobileContactBar.astro';
+import { site } from '@/config/site';
+import { dir, getLang, homePath, languages, ui } from '@/i18n';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const lang = getLang(Astro.currentLocale);
+const t = ui[lang];
+const { title, description = t.meta.description, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : t.meta.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={lang} dir={dir(lang)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {languages.map((code) => <link rel="alternate" hreflang={code} href={new URL(homePath[code], Astro.site)} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL(homePath.fr, Astro.site)} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#42121f" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={t.locale} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // Arriving from the FR/AR switch: stay hidden until LangSwitch restores the
+      // reading position (never more than 1.5s, in case the script fails).
+      try {
+        if (sessionStorage.getItem('dh:lang-scroll')) {
+          document.documentElement.classList.add('lang-restoring');
+          setTimeout(() => document.documentElement.classList.remove('lang-restoring'), 1500);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenu">{t.skipLink}</a>
+    <Header />
+    <main id="contenu">
+      <slot />
+    </main>
+    <Footer />
+    <MobileContactBar />
+
+    <script>
+      // Scroll reveal: elements with [data-reveal] fade up once when entering the viewport.
+      const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+        );
+        targets.forEach((el) => io.observe(el));
+      } else {
+        targets.forEach((el) => el.classList.add('is-visible'));
+      }
+    </script>
+  </body>
+</html>

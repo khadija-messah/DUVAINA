@@ -1,0 +1,172 @@
+---
+/** Internal living style guide — not linked from the site, noindex. */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Divider from '@/components/ui/Divider.astro';
+import Logo from '@/components/ui/Logo.astro';
+
+const colours = [
+  { group: 'Palette', tokens: ['white', 'champagne', 'rose-gold', 'black-cherry', 'black-cherry-dark', 'near-black'] },
+  { group: 'Variations d’opacité', tokens: ['rose-wash', 'rose-tint', 'rose-soft', 'rose-line'] },
+];
+
+const typeScale = ['4xl', '3xl', '2xl', 'xl', 'lg', 'base', 'sm', 'xs'];
+const spacing = ['3xs', '2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'];
+---
+
+<BaseLayout title="Style guide" noindex>
+  <Section labelledby="sg-title">
+    <SectionHeading id="sg-title" level="h1" eyebrow="Design system" title="DuvaniaHaramain <em>— fondations</em>" />
+    <div class="sg-row"><Logo showArabic /></div>
+  </Section>
+
+  <Section theme="rose" labelledby="sg-colours">
+    <h2 id="sg-colours" class="sg-h">Couleurs</h2>
+    {
+      colours.map((c) => (
+        <div class="sg-block">
+          <p class="eyebrow">{c.group}</p>
+          <div class="swatches">
+            {c.tokens.map((t) => (
+              <div class="swatch">
+                <span class="swatch__chip" style={`background: var(--${t})`} />
+                <code>--{t}</code>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </Section>
+
+  <Section labelledby="sg-type">
+    <h2 id="sg-type" class="sg-h">Typographie</h2>
+    <div class="sg-stack">
+      {
+        typeScale.map((s, i) => (
+          <div class="type-row">
+            <code>--text-{s}</code>
+            <span style={`font-size: var(--text-${s}); font-family: ${i < 4 ? 'var(--font-display)' : 'var(--font-body)'}; line-height: 1.2`}>
+              {i < 4 ? 'Votre Omra, en toute sérénité' : 'Des voyages pensés pour les femmes, à La Mecque et Médine.'}
+            </span>
+          </div>
+        ))
+      }
+      <p class="arabic" lang="ar" style="font-size: var(--text-2xl)">دوفاينا الحرمين</p>
+    </div>
+  </Section>
+
+  <Section theme="rose" labelledby="sg-buttons">
+    <h2 id="sg-buttons" class="sg-h">Boutons</h2>
+    <div class="sg-row">
+      <Button icon="whatsapp" iconPosition="start" size="lg">Échanger sur WhatsApp</Button>
+      <Button>Primaire</Button>
+      <Button variant="secondary">Secondaire</Button>
+      <Button variant="text" icon="arrow-right">Lien texte</Button>
+    </div>
+  </Section>
+
+  <Section theme="cherry" labelledby="sg-dark">
+    <h2 id="sg-dark" class="sg-h">Sur fond Black Cherry Dark</h2>
+    <div class="sg-row">
+      <Button size="lg">Primaire</Button>
+      <Button variant="secondary">Secondaire</Button>
+      <Button variant="text" icon="arrow-right">Lien texte</Button>
+    </div>
+    <div class="grid sg-cards">
+      <Card variant="outline" icon="star" title="Carte contour">Texte d’exemple sur fond sombre.</Card>
+      <Card variant="plain" index="01" title="Carte surface">Surface sombre, filet Rose Gold.</Card>
+    </div>
+  </Section>
+
+  <Section labelledby="sg-cards">
+    <h2 id="sg-cards" class="sg-h">Cartes &amp; ornements</h2>
+    <div class="grid sg-cards">
+      <Card icon="comfort" title="Carte standard">Bordure fine, surface blanche.</Card>
+      <Card variant="quiet" index="02" title="Carte discrète">Surface teintée, sans bordure.</Card>
+      <Card variant="outline" icon="route" title="Carte contour">Transparente, filet seul.</Card>
+    </div>
+    <div class="sg-row" style="margin-block-start: var(--space-xl)"><Divider /></div>
+  </Section>
+
+  <Section theme="rose" labelledby="sg-space">
+    <h2 id="sg-space" class="sg-h">Espacements</h2>
+    <div class="sg-stack">
+      {
+        spacing.map((s) => (
+          <div class="type-row">
+            <code>--space-{s}</code>
+            <span class="space-bar" style={`inline-size: var(--space-${s})`} />
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .sg-h {
+    font-size: var(--text-2xl);
+    margin-block-end: var(--space-lg);
+  }
+
+  .sg-block + .sg-block {
+    margin-block-start: var(--space-lg);
+  }
+
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: var(--space-sm);
+    margin-block-start: var(--space-xs);
+  }
+
+  .swatch {
+    display: grid;
+    gap: var(--space-2xs);
+    font-size: var(--text-xs);
+  }
+
+  .swatch__chip {
+    block-size: 4rem;
+    border-radius: var(--radius-sm);
+    border: var(--border-hairline);
+  }
+
+  .sg-stack {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .type-row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+
+  .type-row code {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .space-bar {
+    display: block;
+    block-size: 0.75rem;
+    background: var(--color-primary);
+  }
+
+  .sg-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .sg-cards {
+    margin-block-start: var(--space-xl);
+  }
+</style>

@@ -1,0 +1,115 @@
+---
+/**
+ * Hébergement — the opening of the accommodation chapter: heading on the
+ * start side, three selection criteria as a hairline row on the other.
+ * Describes criteria only; hotel names, categories and locations belong in
+ * each confirmed programme. The two city compositions follow (Hotels).
+ */
+import Icon from '@/components/ui/Icon.astro';
+import { getContent, getLang } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const { accommodation } = getContent(lang);
+---
+
+<section id="hebergement" class="accom theme-dark" aria-labelledby="hebergement-title">
+  <div class="container accom__inner">
+    <header class="accom__head" data-reveal>
+      <p class="eyebrow">{accommodation.eyebrow}</p>
+      <h2 id="hebergement-title" class="accom__title" set:html={accommodation.title} />
+      <p class="accom__intro">{accommodation.intro}</p>
+    </header>
+
+    <ul role="list" class="accom__criteria">
+      {
+        accommodation.criteria.map((c, i) => (
+          <li class="criterion" data-reveal style={`--reveal-delay: ${i * 90}ms`}>
+            <span class="criterion__icon" aria-hidden="true">
+              <Icon name={c.icon} size={22} />
+            </span>
+            <div>
+              <h3 class="criterion__title">{c.title}</h3>
+              <p class="criterion__text">{c.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .accom {
+    padding-block: var(--section-space) clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+
+  .accom__inner {
+    display: grid;
+    gap: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+    align-items: center;
+  }
+
+  .accom__head {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .accom__title {
+    font-size: var(--text-3xl);
+    line-height: 1.06;
+  }
+
+  .accom__intro {
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .accom__criteria {
+    border-block-start: var(--border-hairline);
+  }
+
+  .criterion {
+    display: flex;
+    gap: var(--space-md);
+    padding-block: var(--space-md);
+    border-block-end: var(--border-hairline);
+  }
+
+  .criterion__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+  }
+
+  .criterion__icon :global(svg) {
+    stroke-width: 1.2;
+  }
+
+  .criterion__title {
+    font-size: var(--text-xl);
+    line-height: 1.2;
+  }
+
+  .criterion__text {
+    margin-block-start: 0.35rem;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-light);
+    line-height: 1.7;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 64em) {
+    .accom__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 7rem);
+    }
+  }
+</style>

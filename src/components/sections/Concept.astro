@@ -1,0 +1,180 @@
+---
+/**
+ * "Notre concept" — the brand presentation, as a quiet editorial spread:
+ * a tall photograph in a fine offset frame on the start side; label, title,
+ * text and the five components of a stay as a hairline list on the other.
+ */
+import { Image } from 'astro:assets';
+import Icon from '@/components/ui/Icon.astro';
+import { media } from '@/config/media';
+import { getContent, getLang, mediaAlt } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const { concept } = getContent(lang);
+const photo = media.journeyMedina;
+---
+
+<section id="concept" class="concept theme-ivory" aria-labelledby="concept-title">
+  <div class="container concept__inner">
+    <figure class="concept__media" data-reveal>
+      <Image
+        src={photo.src}
+        alt={mediaAlt('journeyMedina', lang)}
+        widths={[480, 720, 960]}
+        sizes="(min-width: 64em) 40vw, 92vw"
+        loading="lazy"
+        class="concept__img"
+      />
+      <figcaption class="concept__caption">
+        <span class="sparkle" aria-hidden="true"></span>
+        <span class="arabic" lang="ar">المدينة المنورة</span>
+      </figcaption>
+    </figure>
+
+    <div class="concept__text">
+      <header class="concept__head" data-reveal>
+        <p class="eyebrow">{concept.eyebrow}</p>
+        <h2 id="concept-title" class="concept__title" set:html={concept.title} />
+        <p class="concept__body">{concept.body}</p>
+      </header>
+
+      <ol role="list" class="concept__list">
+        {
+          concept.components.map((c, i) => (
+            <li class="concept__item" data-reveal style={`--reveal-delay: ${i * 70}ms`}>
+              <span class="concept__num" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span class="concept__label">{c.label}</span>
+              <span class="concept__icon" aria-hidden="true">
+                <Icon name={c.icon} size={20} />
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .concept {
+    position: relative;
+    padding-block: var(--section-space);
+  }
+
+  .concept__inner {
+    display: grid;
+    gap: clamp(3rem, 2rem + 4vw, 6rem);
+    align-items: center;
+  }
+
+  /* ---- Photograph in a fine offset frame ---- */
+  .concept__media {
+    position: relative;
+    justify-self: center;
+    inline-size: min(100% - 1rem, 25rem);
+    margin-block-start: 1rem;
+    margin-inline-end: 1rem;
+  }
+
+  .concept__media::before {
+    content: '';
+    position: absolute;
+    inset-block: -1rem 1rem;
+    inset-inline: 1rem -1rem;
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius-arch-soft);
+    pointer-events: none;
+  }
+
+  .concept__img {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 62% 60%;
+    border-radius: var(--radius-arch-soft);
+    box-shadow: var(--shadow-md);
+  }
+
+  .concept__caption {
+    position: absolute;
+    inset-block-end: 1.25rem;
+    inset-inline-start: 1.25rem;
+    color: var(--blush);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--wine-950) 72%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 1rem;
+  }
+
+  /* ---- Text ---- */
+  .concept__head {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .concept__title {
+    font-size: var(--text-3xl);
+    line-height: 1.08;
+  }
+
+  .concept__body {
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .concept__list {
+    margin-block-start: var(--space-lg);
+    border-block-start: var(--border-hairline);
+  }
+
+  .concept__item {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-sm);
+    padding-block: 0.8rem;
+    border-block-end: var(--border-hairline);
+    transition: background-color var(--duration-base) var(--ease-out);
+  }
+
+  .concept__num {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.16em;
+    color: var(--color-accent-text);
+  }
+
+  .concept__label {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    color: var(--color-heading);
+  }
+
+  .concept__icon {
+    color: var(--color-ornament);
+    opacity: 0.85;
+  }
+
+  .concept__icon :global(svg) {
+    stroke-width: 1.2;
+  }
+
+  @media (min-width: 64em) {
+    .concept__inner {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    }
+  }
+</style>

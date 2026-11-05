@@ -1,0 +1,89 @@
+---
+/**
+ * Editorial section heading: a sparkle label in tracked capitals, a light
+ * serif title with one italic accent, an optional short intro. An optional
+ * `aside` slot (e.g. a "voir tout" link) sits on the end side from 48em.
+ */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  intro?: string;
+  align?: 'start' | 'center';
+  level?: 'h1' | 'h2';
+  id?: string;
+}
+
+const { eyebrow, title, intro, align = 'start', level = 'h2', id } = Astro.props;
+const Heading = level;
+const hasAside = Astro.slots.has('aside');
+---
+
+<header class:list={['section-heading', `section-heading--${align}`, hasAside && 'section-heading--aside']} data-reveal>
+  <div class="section-heading__main">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <Heading id={id} class="section-heading__title" set:html={title} />
+    {intro && <p class="section-heading__intro">{intro}</p>}
+    <slot />
+  </div>
+  {hasAside && <div class="section-heading__aside"><slot name="aside" /></div>}
+</header>
+
+<style>
+  .section-heading {
+    display: grid;
+    gap: var(--space-md);
+    margin-block-end: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+
+  .section-heading__main {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+    max-inline-size: 46rem;
+  }
+
+  .section-heading__title {
+    font-size: var(--text-3xl);
+    line-height: 1.06;
+  }
+
+  .section-heading__intro {
+    max-inline-size: 38rem;
+    margin-block-start: var(--space-2xs);
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.75;
+    color: var(--color-text-muted);
+  }
+
+  .section-heading--center {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .section-heading--center .section-heading__main {
+    justify-items: center;
+    margin-inline: auto;
+  }
+
+  .section-heading--center .section-heading__intro {
+    margin-inline: auto;
+  }
+
+  /* Centred labels carry a sparkle on both sides. */
+  .section-heading--center .eyebrow::after {
+    content: '';
+    inline-size: 0.6875rem;
+    block-size: 0.6875rem;
+    background: var(--color-ornament);
+    -webkit-mask: var(--sparkle) center / contain no-repeat;
+    mask: var(--sparkle) center / contain no-repeat;
+  }
+
+  @media (min-width: 48em) {
+    .section-heading--aside {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+    }
+  }
+</style>

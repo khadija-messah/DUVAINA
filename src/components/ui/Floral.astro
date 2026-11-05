@@ -1,0 +1,61 @@
+---
+/**
+ * Minimal line-art bloom: three rings of hairline petals around a stamen
+ * crown, with an optional stem and leaf. Purely ornamental (aria-hidden);
+ * colour follows `currentColor`, strokes stay hairline at any size.
+ */
+interface Props {
+  size?: number;
+  stem?: boolean;
+  class?: string;
+}
+
+const { size = 240, stem = false, class: className } = Astro.props;
+
+const petal = (r: number, w: number) =>
+  `M0 0C${-w} ${-r * 0.3} ${-w * 0.72} ${-r * 0.86} 0 ${-r}C${w * 0.72} ${-r * 0.86} ${w} ${-r * 0.3} 0 0Z`;
+
+const rings = [
+  { d: petal(94, 40), count: 8, offset: 22.5 },
+  { d: petal(68, 30), count: 8, offset: 0 },
+  { d: petal(40, 18), count: 5, offset: 18 },
+];
+---
+
+<svg
+  class:list={['floral', className]}
+  width={size}
+  height={stem ? size * 1.5 : size}
+  viewBox={stem ? '-100 -100 200 300' : '-100 -100 200 200'}
+  fill="none"
+  stroke="currentColor"
+  aria-hidden="true"
+  focusable="false"
+>
+  {
+    rings.map((ring) =>
+      Array.from({ length: ring.count }, (_, i) => (
+        <path d={ring.d} transform={`rotate(${ring.offset + (360 / ring.count) * i})`} vector-effect="non-scaling-stroke" />
+      )),
+    )
+  }
+  <circle r="7" vector-effect="non-scaling-stroke" />
+  {Array.from({ length: 10 }, (_, i) => <circle cx="0" cy="-13" r="1.2" fill="currentColor" stroke="none" transform={`rotate(${i * 36})`} />)}
+  {
+    stem && (
+      <>
+        <path d="M4 92C10 140 2 190-6 196" vector-effect="non-scaling-stroke" />
+        <path d="M6 150C30 128 58 132 70 140C52 156 26 160 6 150Z" vector-effect="non-scaling-stroke" />
+        <path d="M6 150C34 144 52 140 70 140" vector-effect="non-scaling-stroke" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .floral {
+    display: block;
+    pointer-events: none;
+    stroke-width: 0.8;
+  }
+</style>

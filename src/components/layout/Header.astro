@@ -1,0 +1,350 @@
+---
+/**
+ * Site header — discreet and editorial, on the night-burgundy ground.
+ *  - Sticky; transparent at the top, a translucent wine veil and a hairline
+ *    once scrolled (data-scrolled).
+ *  - ≥ 80em: logo at the start, navigation centred in tracked capitals,
+ *    FR / AR switch and the "Nous écrire" pill at the end.
+ *  - < 80em: logo + language switch + menu button opening a full-height sheet.
+ * Logical properties throughout, so Arabic mirrors the whole bar.
+ */
+import Logo from '@/components/ui/Logo.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LangSwitch from '@/components/layout/LangSwitch.astro';
+import { whatsappHref, isWhatsappConfigured } from '@/config/site';
+import { getLang, homePath, ui } from '@/i18n';
+
+const lang = getLang(Astro.currentLocale);
+const t = ui[lang];
+const navigation = t.nav;
+---
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a href={homePath[lang]} class="site-header__brand" aria-label={t.header.home}>
+      <Logo />
+    </a>
+
+    <nav class="site-nav" aria-label={t.header.navMain}>
+      <ul role="list" class="site-nav__list">
+        {navigation.map((item) => (
+          <li><a href={item.href} class="site-nav__link">{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <LangSwitch />
+      <Button href={whatsappHref(t.whatsappMessage)} external={isWhatsappConfigured} variant="secondary" class="site-header__cta">
+        {t.header.cta}
+      </Button>
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-toggle
+        data-label-open={t.header.menuOpen}
+        data-label-close={t.header.menuClose}
+      >
+        <span class="visually-hidden" data-menu-label>{t.header.menuOpen}</span>
+        <Icon name="menu" class="menu-toggle__open" />
+        <Icon name="close" class="menu-toggle__close" />
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="mobile-menu theme-night" data-menu hidden>
+    <nav class="container mobile-menu__inner" aria-label={t.header.navMobile}>
+      <ul role="list" class="mobile-menu__list">
+        {navigation.map((item, i) => (
+          <li style={`--i: ${i}`}>
+            <a href={item.href} class="mobile-menu__link" data-menu-link>
+              <span class="mobile-menu__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="mobile-menu__footer">
+        <Button href={whatsappHref(t.whatsappMessage)} external={isWhatsappConfigured} icon="whatsapp" iconPosition="start" size="lg" block>
+          {t.header.menuCta}
+        </Button>
+        <p class="mobile-menu__tagline"><span class="sparkle" aria-hidden="true"></span>{t.tagline}</p>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const label = document.querySelector<HTMLElement>('[data-menu-label]');
+
+  if (header) {
+    const onScroll = () => header.toggleAttribute('data-scrolled', window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  if (header && toggle && menu && label) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      label.textContent = (open ? toggle.dataset.labelClose : toggle.dataset.labelOpen) ?? '';
+      header.toggleAttribute('data-menu-open', open);
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      if (open) {
+        menu.hidden = false;
+        requestAnimationFrame(() => menu.setAttribute('data-open', ''));
+      } else {
+        menu.removeAttribute('data-open');
+        menu.hidden = true;
+      }
+    };
+
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    menu.querySelectorAll('[data-menu-link]').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    window.matchMedia('(min-width: 80em)').addEventListener('change', (e) => e.matches && setOpen(false));
+  }
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-header);
+    block-size: var(--header-height);
+    background-color: color-mix(in srgb, var(--wine-900) 0%, transparent);
+    border-block-end: 1px solid transparent;
+    transition:
+      background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
+  }
+
+  .site-header[data-scrolled] {
+    background-color: color-mix(in srgb, var(--wine-900) 86%, transparent);
+    border-block-end-color: var(--color-border);
+    backdrop-filter: saturate(1.1) blur(14px);
+    -webkit-backdrop-filter: saturate(1.1) blur(14px);
+  }
+
+  /* backdrop-filter would become the containing block of the fixed sheet, so drop it while open. */
+  .site-header[data-menu-open] {
+    background-color: var(--wine-950);
+    border-block-end-color: var(--color-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    block-size: 100%;
+    max-inline-size: calc(var(--container-wide) + 2 * var(--gutter));
+  }
+
+  .site-header__brand {
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* Desktop nav: tracked capitals, centred between logo and actions. */
+  .site-nav {
+    display: none;
+  }
+
+  .site-nav__list {
+    display: flex;
+    gap: clamp(1.1rem, 1.9vw, 2.25rem);
+  }
+
+  .site-nav__link {
+    position: relative;
+    display: inline-block;
+    padding-block: var(--space-2xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .site-nav__link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 1px;
+    background: var(--color-ornament);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  :global([dir='rtl']) .site-nav__link::after {
+    transform-origin: right;
+  }
+
+  .site-nav__link:hover {
+    color: var(--color-heading);
+  }
+
+  .site-nav__link:hover::after {
+    transform: scaleX(1);
+  }
+
+  .site-header__actions :global(.site-header__cta) {
+    display: none;
+    --btn-height: 2.5rem;
+    padding-inline: 1.35rem;
+  }
+
+  /* Menu toggle */
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    margin-inline-end: calc(-1 * var(--space-2xs));
+    color: var(--color-heading);
+  }
+
+  .menu-toggle :global(.menu-toggle__close),
+  .site-header[data-menu-open] .menu-toggle :global(.menu-toggle__open) {
+    display: none;
+  }
+
+  .site-header[data-menu-open] .menu-toggle :global(.menu-toggle__close) {
+    display: block;
+  }
+
+  /* Mobile sheet */
+  .mobile-menu {
+    position: fixed;
+    inset: var(--header-height) 0 0;
+    z-index: var(--z-menu);
+    overflow-y: auto;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .mobile-menu[data-open] {
+    opacity: 1;
+  }
+
+  .mobile-menu__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-xl);
+    min-block-size: 100%;
+    padding-block: var(--space-lg);
+  }
+
+  .mobile-menu__list li {
+    border-block-end: var(--border-hairline);
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      transform var(--duration-slow) var(--ease-out);
+    transition-delay: calc(var(--i) * 50ms + 60ms);
+  }
+
+  .mobile-menu[data-open] .mobile-menu__list li {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mobile-menu__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    padding-block: 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-light);
+    line-height: 1.2;
+    color: var(--color-heading);
+    text-decoration: none;
+  }
+
+  .mobile-menu__num {
+    font-family: var(--font-body);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.16em;
+    color: var(--color-accent-text);
+  }
+
+  .mobile-menu__footer {
+    display: grid;
+    gap: var(--space-sm);
+    text-align: center;
+  }
+
+  .mobile-menu__tagline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-inline: auto;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--color-text-muted);
+  }
+
+  :global(:root[lang='ar']) .mobile-menu__tagline {
+    font-style: normal;
+  }
+
+  :global(:root[lang='ar']) .site-nav__link {
+    font-size: 0.875rem;
+    text-transform: none;
+  }
+
+  @media (min-width: 48em) {
+    .site-header__actions :global(.site-header__cta) {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 80em) {
+    .site-header__inner {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+    }
+
+    .site-nav {
+      display: block;
+    }
+
+    .site-header__actions {
+      justify-self: end;
+    }
+
+    .menu-toggle,
+    .mobile-menu {
+      display: none;
+    }
+  }
+</style>

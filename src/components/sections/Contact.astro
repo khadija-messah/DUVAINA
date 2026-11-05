@@ -1,0 +1,415 @@
+---
+/**
+ * Contact — a large serif invitation, the contact channels in hairline
+ * circles and the direct WhatsApp CTA on the start side; a short form on a
+ * framed wine panel on the other. A line-art bloom sits in an arch behind.
+ * The form has no backend: on submit it composes a message and opens WhatsApp
+ * (or the e-mail client when only an address is configured). Nothing is stored.
+ */
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Floral from '@/components/ui/Floral.astro';
+import { getContent, getLang, ui } from '@/i18n';
+import { contact, whatsappHref, isWhatsappConfigured } from '@/config/site';
+
+const lang = getLang(Astro.currentLocale);
+const { contactSection } = getContent(lang);
+const t = ui[lang];
+// Strings the submit script needs, in the page language.
+const formStrings = JSON.stringify({
+  errorName: t.form.errorName,
+  unavailable: t.form.unavailable,
+  greeting: t.form.greeting,
+  intro: t.form.intro,
+  city: t.form.city,
+  period: t.form.period,
+  travellers: t.form.travellers,
+  mailSubject: t.form.mailSubject,
+});
+---
+
+<Section id="contact" theme="rose" labelledby="contact-title" class="contact-section">
+  <span class="contact__arch" aria-hidden="true">
+    <Floral size={360} stem class="contact__floral" />
+  </span>
+  <div class="contact">
+    <div class="contact__intro" data-reveal>
+      <p class="eyebrow">{contactSection.eyebrow}</p>
+      <h2 id="contact-title" class="contact__title" set:html={contactSection.title} />
+      <p class="contact__text">{contactSection.text}</p>
+      {(contact.email || contact.instagram) && (
+      <ul role="list" class="contact__channels">
+        {contact.email && (
+          <li>
+            <a href={`mailto:${contact.email}`}>
+              <span class="contact__channel-icon" aria-hidden="true"><Icon name="mail" size={18} /></span>
+              <span>
+                <span class="contact__channel-label">{lang === 'ar' ? 'البريد الإلكتروني' : 'E-mail'}</span>
+                <span class="contact__channel-value">{contact.email}</span>
+              </span>
+            </a>
+          </li>
+        )}
+        {contact.instagram && (
+          <li>
+            <a href={`https://instagram.com/${contact.instagram}`} target="_blank" rel="noopener noreferrer">
+              <span class="contact__channel-icon" aria-hidden="true"><Icon name="instagram" size={18} /></span>
+              <span>
+                <span class="contact__channel-label">Instagram</span>
+                <span class="contact__channel-value">@{contact.instagram}</span>
+              </span>
+            </a>
+          </li>
+        )}
+      </ul>
+      )}
+      <div class="contact__direct">
+        <Button href={whatsappHref(t.whatsappMessage)} external={isWhatsappConfigured} size="lg" icon="whatsapp" iconPosition="start">
+          {contactSection.directCta}
+        </Button>
+      </div>
+    </div>
+
+    <div class="contact__form-wrap" data-reveal style="--reveal-delay: 120ms">
+      <form
+        class="form"
+        data-contact-form
+        data-whatsapp={contact.whatsapp}
+        data-email={contact.email}
+        data-i18n={formStrings}
+        novalidate
+      >
+        <p class="form__title"><span class="sparkle" aria-hidden="true"></span>{t.form.title}</p>
+
+        <div class="form__row">
+          <div class="field">
+            <label for="cf-name">{t.form.name} <span aria-hidden="true">*</span></label>
+            <input id="cf-name" name="name" type="text" autocomplete="given-name" required />
+          </div>
+          <div class="field">
+            <label for="cf-city">{t.form.city}</label>
+            <input id="cf-city" name="city" type="text" autocomplete="address-level2" />
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="field">
+            <label for="cf-period">{t.form.period}</label>
+            <div class="field__select">
+              <select id="cf-period" name="period">
+                {contactSection.periods.map((p) => <option value={p}>{p}</option>)}
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="cf-travellers">{t.form.travellers}</label>
+            <input id="cf-travellers" name="travellers" type="number" inputmode="numeric" min="1" max="20" value="1" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cf-message">{t.form.message}</label>
+          <textarea id="cf-message" name="message" rows="4" placeholder={t.form.placeholder}></textarea>
+        </div>
+
+        <Button type="submit" size="lg" icon="whatsapp" iconPosition="start" block>
+          {contactSection.submitCta}
+        </Button>
+        <p class="form__note" data-form-status role="status">{contactSection.formNote}</p>
+      </form>
+    </div>
+  </div>
+</Section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const status = form?.querySelector<HTMLElement>('[data-form-status]');
+
+  const t = JSON.parse(form?.dataset.i18n ?? '{}') as Record<string, string>;
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+
+    if (!nameInput.value.trim()) {
+      nameInput.setAttribute('aria-invalid', 'true');
+      nameInput.focus();
+      if (status) status.textContent = t.errorName;
+      return;
+    }
+    nameInput.removeAttribute('aria-invalid');
+
+    const data = new FormData(form);
+    const lines = [
+      t.greeting,
+      `${t.intro} ${data.get('name')}.`,
+      data.get('city') ? `${t.city} : ${data.get('city')}` : '',
+      `${t.period} : ${data.get('period')}`,
+      `${t.travellers} : ${data.get('travellers')}`,
+      data.get('message') ? `\n${data.get('message')}` : '',
+    ].filter(Boolean);
+    const text = lines.join('\n');
+
+    const { whatsapp, email } = form.dataset;
+    if (whatsapp) {
+      window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    } else if (email) {
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent(t.mailSubject)}&body=${encodeURIComponent(text)}`;
+    } else if (status) {
+      status.textContent = t.unavailable;
+    }
+  });
+</script>
+
+<style>
+  :global(.contact-section) {
+    overflow: hidden;
+  }
+
+  /* A tall hairline arch holding a line-art bloom, behind the form side. */
+  .contact__arch {
+    position: absolute;
+    inset-block: 12% -2rem;
+    inset-inline-end: max(1rem, (100% - var(--container-max)) / 2 - 4rem);
+    inline-size: min(34rem, 60vw);
+    border: 1px solid var(--gold-line);
+    border-block-end: 0;
+    border-radius: var(--radius-arch);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .contact__arch :global(.contact__floral) {
+    position: absolute;
+    inset-block-end: -6rem;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: 80%;
+    block-size: auto;
+    color: var(--rose-gold);
+    opacity: 0.22;
+  }
+
+  .contact {
+    position: relative;
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .contact__intro {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .contact__title {
+    font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.75rem);
+    font-weight: var(--weight-light);
+    line-height: 1;
+  }
+
+  .contact__title :global(em) {
+    display: block;
+  }
+
+  .contact__text {
+    max-inline-size: 30rem;
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .contact__channels {
+    display: grid;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-xs);
+  }
+
+  .contact__channels a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-block-size: 2.75rem;
+    color: var(--color-heading);
+    text-decoration: none;
+  }
+
+  .contact__channel-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+    transition: background-color var(--duration-base) var(--ease-out);
+  }
+
+  .contact__channels a:hover .contact__channel-icon {
+    background: color-mix(in srgb, var(--black-cherry) 55%, transparent);
+  }
+
+  .contact__channel-label {
+    display: block;
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .contact__channel-value {
+    display: block;
+    font-size: var(--text-sm);
+  }
+
+  .contact__direct {
+    margin-block-start: var(--space-xs);
+  }
+
+  .contact__form-wrap {
+    position: relative;
+  }
+
+  .form {
+    position: relative;
+    display: grid;
+    gap: var(--space-md);
+    padding: clamp(1.5rem, 1rem + 2.5vw, 2.75rem);
+    background: var(--color-panel);
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .form__title {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-light);
+    line-height: 1.1;
+    color: var(--color-heading);
+  }
+
+  .form__row {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .field {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .field label {
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .field label span {
+    color: var(--color-accent-text);
+  }
+
+  /* Underlined fields: only a hairline, gold on focus. */
+  .field input,
+  .field select,
+  .field textarea {
+    inline-size: 100%;
+    min-block-size: 3rem;
+    padding: var(--space-xs) 0;
+    background: transparent;
+    border: 0;
+    border-block-end: 1px solid var(--color-field-line);
+    border-radius: 0;
+    font-size: 1rem; /* ≥16px avoids iOS zoom on focus */
+    color: var(--color-heading);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-block-size: 6rem;
+    padding: var(--space-xs);
+    border: 1px solid var(--color-field-line);
+    border-radius: var(--radius-sm);
+  }
+
+  .field ::placeholder {
+    color: color-mix(in srgb, var(--color-text-muted) 75%, transparent);
+  }
+
+  .field select option {
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .field input:focus-visible,
+  .field select:focus-visible,
+  .field textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-ornament);
+  }
+
+  .field [aria-invalid='true'] {
+    border-color: var(--color-accent-text);
+  }
+
+  .field__select {
+    position: relative;
+  }
+
+  .field__select select {
+    appearance: none;
+    padding-inline-end: var(--space-xl);
+  }
+
+  .field__select::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: 0.25rem;
+    inset-block-start: 50%;
+    inline-size: 7px;
+    block-size: 7px;
+    border-inline-end: 1px solid var(--color-ornament);
+    border-block-end: 1px solid var(--color-ornament);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .form__note {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-inline: auto;
+  }
+
+  :global(:root[lang='ar']) .field label,
+  :global(:root[lang='ar']) .contact__channel-label {
+    font-size: 0.875rem;
+    text-transform: none;
+  }
+
+  @media (min-width: 40em) {
+    .form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .contact {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 7rem);
+    }
+  }
+</style>

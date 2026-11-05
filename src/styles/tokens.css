@@ -1,0 +1,234 @@
+/* ==========================================================================
+   DuvaniaHaramain — Design tokens
+   Single source of truth for colour, type, spacing, radius, elevation, motion.
+
+   ART DIRECTION — editorial, feminine and luxurious. Light ivory and cream
+   sections alternate with deep burgundy ones that set off key content
+   (hero, experience, accommodation, departures, footer); powder pink,
+   antique rose, champagne and a whisper of gold are the accents.
+   Light themes: .theme-ivory (#FBF7F2) and .theme-cream (#F4EADD).
+   Dark (default, or .theme-dark to reset inside a light section).
+     Wine 900           #310711  page background
+     Wine 850           #3A0B17  alternate sections, surfaces
+     Wine 950           #24050D  footer, deepest ground
+     Black Cherry       #721D35  primary buttons, selected states
+     Black Cherry Dark  #42121F  raised panels
+     Blush              #F2DCD3  headings (powder pink)
+     Champagne          #EFE1CE  body text
+     Antique rose       #D7A094  small labels, italic accents
+     Rose Gold          #B9857C  decorative lines and shapes
+     Gold               #C9A46E  sparkles, hairlines — sparingly
+
+   Contrast on Wine 900 (WCAG 2.2):
+     Blush 14.6:1 · Champagne 14.1:1 · Champagne 72% ≈ 8:1
+     Antique rose 7.6:1 · Gold 7.9:1 · Rose Gold 5.6:1
+
+   Components consume the semantic tokens (--color-*) so section themes can
+   swap them.
+   ========================================================================== */
+
+:root {
+  /* ---- Brand colours ------------------------------------------------------ */
+  --white: #ffffff;
+  --wine-950: #24050d;
+  --wine-900: #310711;
+  --wine-850: #3a0b17;
+  --wine-800: #4a1020;
+  --black-cherry: #721d35;
+  --black-cherry-dark: #42121f;
+  --near-black: #1c0b12;
+  --blush: #f2dcd3;
+  --champagne: #efe1ce;
+  --rose-ancien: #d7a094;
+  --rose-gold: #b9857c;
+  --gold: #c9a46e;
+  /* Deep green echoing the holy sites — fine accents only. */
+  --holy-green: #1e4d3a;
+
+  /* ---- Opacity variations ------------------------------------------------- */
+  --rose-tint: color-mix(in srgb, var(--rose-gold) 16%, var(--wine-900));
+  --rose-wash: color-mix(in srgb, var(--rose-gold) 7%, var(--wine-900));
+  --rose-soft: color-mix(in srgb, var(--rose-gold) 32%, var(--wine-900));
+  --rose-line: color-mix(in srgb, var(--rose-gold) 40%, transparent);
+  --ivory: #fbf7f2;
+  --cream: #f4eadd;
+
+  /* ---- Semantic colour (default = night burgundy) ------------------------- */
+  --color-bg: var(--wine-900);
+  --color-surface: var(--wine-850);
+  --color-surface-alt: var(--wine-800);
+  --color-tint: var(--rose-tint);
+  --color-heading: var(--blush);
+  --color-text: color-mix(in srgb, var(--champagne) 88%, transparent);
+  --color-text-muted: color-mix(in srgb, var(--champagne) 70%, transparent);
+  --color-primary: var(--black-cherry);
+  --color-primary-hover: color-mix(in srgb, var(--black-cherry) 82%, var(--rose-gold));
+  --color-on-primary: var(--blush);
+  --color-accent: var(--gold);
+  --color-accent-text: var(--rose-ancien);
+  --color-border: var(--hairline);
+  --color-border-strong: var(--gold-line);
+  --color-focus: var(--blush);
+  /* Ornaments: sparkles, fine icons, hairlines, icon rings, panels. */
+  --color-ornament: var(--gold);
+  --hairline: color-mix(in srgb, var(--champagne) 14%, transparent);
+  --gold-line: color-mix(in srgb, var(--gold) 55%, transparent);
+  --color-ring: color-mix(in srgb, var(--rose-ancien) 55%, transparent);
+  --color-panel: color-mix(in srgb, var(--wine-950) 80%, transparent);
+  --color-placeholder: var(--wine-800);
+  --color-field-line: color-mix(in srgb, var(--champagne) 26%, transparent);
+
+  /* ---- Ornament: four-point sparkle (used through CSS masks) -------------- */
+  --sparkle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 0C10.9 6 14 9.1 20 10C14 10.9 10.9 14 10 20C9.1 14 6 10.9 0 10C6 9.1 9.1 6 10 0Z'/%3E%3C/svg%3E");
+
+  /* ---- Typography -------------------------------------------------------- */
+  --font-display: 'Cormorant Garamond Variable', 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-body: 'Manrope Variable', 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-arabic: 'Amiri', 'Noto Naskh Arabic', serif;
+
+  /* Fluid modular scale — 360px → 1440px viewport.
+     Cormorant has a small x-height, so display steps run larger than usual. */
+  --text-2xs: 0.6875rem;                                      /* 11 — tracked caps */
+  --text-xs: 0.75rem;                                         /* 12 — labels */
+  --text-sm: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);     /* 14–15 */
+  --text-base: clamp(0.9375rem, 0.92rem + 0.12vw, 1.0625rem); /* 15–17 body */
+  --text-lg: clamp(1.0625rem, 1.02rem + 0.25vw, 1.25rem);     /* 17–20 lead */
+  --text-xl: clamp(1.375rem, 1.25rem + 0.55vw, 1.75rem);      /* 22–28 */
+  --text-2xl: clamp(1.625rem, 1.4rem + 0.9vw, 2.25rem);       /* 26–36 */
+  --text-3xl: clamp(2rem, 1.6rem + 1.7vw, 3.125rem);          /* 32–50 h2 */
+  --text-4xl: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem);          /* 40–72 h1 */
+
+  --leading-tight: 1.04;
+  --leading-snug: 1.22;
+  --leading-body: 1.7;
+
+  --tracking-tight: -0.01em;
+  --tracking-label: 0.24em;
+
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --measure: 62ch;
+
+  /* ---- Spacing (4px base, named t-shirt scale) --------------------------- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* Fluid layout spacing */
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);           /* 16px min on phones */
+  --section-space: clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  --stack-gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+
+  /* ---- Layout ------------------------------------------------------------ */
+  --container-max: 78rem;
+  --container-wide: 88rem;
+  --container-narrow: 46rem;
+  --header-height: 4.75rem;
+
+  /* ---- Shape: hairlines, pills and the arch ------------------------------ */
+  --radius-button: 999px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-arch: 999px 999px 0 0;
+  --radius-arch-soft: 999px 999px 6px 6px;
+
+  --border-hairline: 1px solid var(--color-border);
+  --border-accent: 1px solid var(--color-border-strong);
+
+  /* ---- Elevation (deep, soft, tinted) ------------------------------------ */
+  --shadow-sm: 0 1px 2px rgb(10 1 4 / 0.25), 0 6px 18px rgb(10 1 4 / 0.25);
+  --shadow-md: 0 2px 8px rgb(10 1 4 / 0.3), 0 24px 60px rgb(10 1 4 / 0.45);
+
+  /* ---- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 180ms;
+  --duration-base: 360ms;
+  --duration-slow: 1100ms;
+
+  /* ---- Layers ------------------------------------------------------------ */
+  --z-header: 50;
+  --z-mobile-bar: 40;
+  --z-menu: 60;
+}
+
+/* ---- Section themes -------------------------------------------------------
+   Dark burgundy is the default; light themes remap every semantic token, so
+   components never hard-code a background-specific colour. */
+.theme-dark,
+.theme-white,
+.theme-cherry,
+.theme-night {
+  --color-bg: var(--wine-900);
+  --color-surface: var(--wine-850);
+  --color-heading: var(--blush);
+  --color-text: color-mix(in srgb, var(--champagne) 88%, transparent);
+  --color-text-muted: color-mix(in srgb, var(--champagne) 70%, transparent);
+  --color-on-primary: var(--blush);
+  --color-accent-text: var(--rose-ancien);
+  --color-focus: var(--blush);
+  --color-ornament: var(--gold);
+  --hairline: color-mix(in srgb, var(--champagne) 14%, transparent);
+  --gold-line: color-mix(in srgb, var(--gold) 55%, transparent);
+  --color-border: var(--hairline);
+  --color-border-strong: var(--gold-line);
+  --color-ring: color-mix(in srgb, var(--rose-ancien) 55%, transparent);
+  --color-panel: color-mix(in srgb, var(--wine-950) 80%, transparent);
+  --color-placeholder: var(--wine-800);
+  --color-field-line: color-mix(in srgb, var(--champagne) 26%, transparent);
+}
+
+.theme-cherry {
+  --color-bg: var(--black-cherry-dark);
+}
+
+.theme-night {
+  --color-bg: var(--wine-950);
+}
+
+/* Light sections: ivory or cream, Black Cherry text accents, antique gold
+   ornaments (3.6:1, decorative), Rose Gold hairlines. */
+.theme-ivory,
+.theme-cream,
+.theme-rose {
+  --color-bg: var(--ivory);
+  --color-surface: var(--white);
+  --color-heading: var(--black-cherry-dark);
+  --color-text: color-mix(in srgb, var(--near-black) 86%, transparent);
+  --color-text-muted: color-mix(in srgb, var(--near-black) 70%, transparent);
+  --color-primary: var(--black-cherry);
+  --color-primary-hover: var(--black-cherry-dark);
+  --color-on-primary: var(--champagne);
+  --color-accent-text: var(--black-cherry);
+  --color-focus: var(--black-cherry);
+  --color-ornament: #a67c52;
+  --hairline: color-mix(in srgb, var(--black-cherry-dark) 13%, transparent);
+  --gold-line: color-mix(in srgb, var(--rose-gold) 62%, transparent);
+  --color-border: var(--hairline);
+  --color-border-strong: var(--gold-line);
+  --color-ring: color-mix(in srgb, var(--rose-gold) 60%, transparent);
+  --color-panel: color-mix(in srgb, var(--white) 78%, transparent);
+  --color-placeholder: color-mix(in srgb, var(--rose-gold) 18%, var(--ivory));
+  --color-field-line: color-mix(in srgb, var(--black-cherry-dark) 22%, transparent);
+}
+
+.theme-cream,
+.theme-rose {
+  --color-bg: var(--cream);
+}
+
+[class*='theme-'] {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

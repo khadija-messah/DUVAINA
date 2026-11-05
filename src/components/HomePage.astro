@@ -1,0 +1,37 @@
+---
+/**
+ * The landing page, shared by every language route (/ and /ar/). Sections read
+ * the active language themselves (Astro.currentLocale), so both versions
+ * always contain the same sections and features.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/sections/Hero.astro';
+import Concept from '@/components/sections/Concept.astro';
+import ForYou from '@/components/sections/ForYou.astro';
+import JourneyStory from '@/components/sections/JourneyStory.astro';
+import ProgrammeCards from '@/components/sections/ProgrammeCards.astro';
+import OutfitBanner from '@/components/sections/OutfitBanner.astro';
+import StepsTimeline from '@/components/sections/StepsTimeline.astro';
+import Accommodation from '@/components/sections/Accommodation.astro';
+import Hotels from '@/components/sections/Hotels.astro';
+import Gifts from '@/components/sections/Gifts.astro';
+import Programmes from '@/components/sections/Programmes.astro';
+import Faq from '@/components/sections/Faq.astro';
+import Contact from '@/components/sections/Contact.astro';
+---
+
+<BaseLayout>
+  <Hero />
+  <Concept />
+  <ForYou />
+  <JourneyStory />
+  <ProgrammeCards />
+  <OutfitBanner />
+  <StepsTimeline />
+  <Accommodation />
+  <Hotels />
+  <Gifts />
+  <Programmes />
+  <Faq />
+  <Contact />
+</BaseLayout>

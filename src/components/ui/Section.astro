@@ -1,0 +1,18 @@
+---
+/** Section wrapper: applies a colour theme, vertical rhythm and container width. */
+interface Props {
+  id?: string;
+  theme?: 'white' | 'rose' | 'cherry' | 'night';
+  width?: 'default' | 'narrow' | 'wide';
+  labelledby?: string;
+  class?: string;
+}
+
+const { id, theme = 'white', width = 'default', labelledby, class: className } = Astro.props;
+---
+
+<section id={id} class:list={['section', `theme-${theme}`, className]} aria-labelledby={labelledby}>
+  <div class:list={['container', width !== 'default' && `container--${width}`]}>
+    <slot />
+  </div>
+</section>

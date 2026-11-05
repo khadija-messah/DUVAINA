@@ -1,0 +1,232 @@
+---
+/**
+ * "Une Omra au féminin" — the experience and its five strengths.
+ * Editorial head (title on the start side, lead, text and actions on the
+ * other), then a numbered row of fine-line icons separated by hairlines:
+ * no cards, no heavy shadows. Values describe intent only; services are
+ * those confirmed in each programme.
+ */
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { getContent, getLang, ui } from '@/i18n';
+import { whatsappHref, isWhatsappConfigured } from '@/config/site';
+
+const lang = getLang(Astro.currentLocale);
+const { forYou } = getContent(lang);
+---
+
+<section id="pour-vous" class="foryou theme-dark" aria-labelledby="pour-vous-title">
+  <div class="container">
+    <div class="foryou__head">
+      <div class="foryou__title-wrap" data-reveal>
+        <p class="eyebrow">{forYou.eyebrow}</p>
+        <h2 id="pour-vous-title" class="foryou__title" set:html={forYou.title} />
+      </div>
+      <div class="foryou__intro" data-reveal style="--reveal-delay: 120ms">
+        <p class="foryou__lead">{forYou.intro}</p>
+        {forYou.body.map((p) => <p class="foryou__body">{p}</p>)}
+        <div class="foryou__actions">
+          <Button href="#programmes" icon="arrow-right">{forYou.primaryCta}</Button>
+          <Button href={whatsappHref(ui[lang].questionMessage)} external={isWhatsappConfigured} variant="text" icon="arrow-right">
+            {forYou.secondaryCta}
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <ol role="list" class="foryou__values">
+      {
+        forYou.values.map((v, i) => (
+          <li class="value" data-reveal style={`--reveal-delay: ${i * 90}ms`}>
+            <span class="value__icon" aria-hidden="true">
+              <Icon name={v.icon} size={22} />
+            </span>
+            <div class="value__body">
+              <span class="value__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="value__title">{v.title}</h3>
+              <p class="value__text">{v.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="foryou__note" data-reveal>{forYou.note}</p>
+  </div>
+</section>
+
+<style>
+  .foryou {
+    padding-block: var(--section-space);
+  }
+
+  /* ---- Head ---- */
+  .foryou__head {
+    display: grid;
+    gap: var(--space-lg);
+    margin-block-end: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+
+  .foryou__title-wrap {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .foryou__title {
+    font-size: var(--text-3xl);
+    line-height: 1.06;
+  }
+
+  .foryou__intro {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+  }
+
+  .foryou__lead {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--color-accent-text);
+  }
+
+  :global(:root[lang='ar']) .foryou__lead {
+    font-style: normal;
+  }
+
+  .foryou__body {
+    font-size: var(--text-base);
+    font-weight: var(--weight-light);
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .foryou__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm) var(--space-lg);
+    margin-block-start: var(--space-sm);
+  }
+
+  /* ---- Numbered strengths ----
+     Phones: one row per strength (icon ring at the start, text beside it).
+     Tablet: two columns. Desktop: five columns between hairlines, each with
+     the same stack (ring, number, title, text) so everything lines up. */
+  .foryou__values {
+    display: grid;
+    border-block-start: var(--border-hairline);
+  }
+
+  .value {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-sm);
+    padding-block: var(--space-md);
+    border-block-end: var(--border-hairline);
+  }
+
+  .value__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 1px solid var(--color-ring);
+    border-radius: 50%;
+    color: var(--color-ornament);
+  }
+
+  .value__icon :global(svg) {
+    stroke-width: 1.2;
+  }
+
+  .value__body {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .value__num {
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    color: var(--color-accent-text);
+  }
+
+  .value__title {
+    font-family: var(--font-body);
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-semibold);
+    line-height: 1.5;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-heading);
+  }
+
+  :global(:root[lang='ar']) .value__title {
+    font-size: 1rem;
+    font-weight: var(--weight-medium);
+    line-height: 1.6 !important;
+  }
+
+  .value__text {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-light);
+    line-height: 1.65;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 40em) and (max-width: 63.99em) {
+    .foryou__values {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-xl);
+    }
+
+    /* The fifth strength spans both columns. */
+    .value:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .foryou__values {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      border-block: var(--border-hairline);
+    }
+
+    .value {
+      grid-template-columns: 1fr;
+      align-content: start;
+      gap: var(--space-sm);
+      padding: var(--space-lg) clamp(0.9rem, 1.6vw, 1.5rem);
+      border-block-end: 0;
+    }
+
+    .value:first-child {
+      padding-inline-start: 0;
+    }
+
+    .value:last-child {
+      padding-inline-end: 0;
+    }
+
+    .value + .value {
+      border-inline-start: var(--border-hairline);
+    }
+  }
+
+  .foryou__note {
+    margin-block-start: var(--space-lg);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 64em) {
+    .foryou__head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 7rem);
+      align-items: end;
+    }
+  }
+</style>
